@@ -1,6 +1,9 @@
 {
   "name": "iptv",
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "act:check": "gh act pull_request -W .github/workflows/check.yml",
     "act:format": "gh act workflow_dispatch -W .github/workflows/format.yml",
     "act:update": "gh act workflow_dispatch -W .github/workflows/update.yml",
@@ -23,7 +26,7 @@
     "deploy": "npm run playlist:deploy && npm run api:deploy",
     "lint": "npx eslint \"scripts/**/*.{ts,js}\" \"tests/**/*.{ts,js}\"",
     "test": "jest --runInBand",
-    "postinstall": "npm run api:load"
+    "postinstall": "echo 'Skipping api:load for web app'"
   },
   "jest": {
     "transform": {
@@ -45,7 +48,6 @@
     "@freearhey/search-js": "^0.1.2",
     "@freearhey/storage-js": "^0.1.0",
     "@inquirer/prompts": "^7.8.0",
-    "@iptv-org/sdk": "^1.0.2",
     "@octokit/core": "^7.0.3",
     "@octokit/plugin-paginate-rest": "^13.1.1",
     "@octokit/plugin-rest-endpoint-methods": "^16.0.0",
@@ -78,7 +80,17 @@
     "mediainfo.js": "^0.3.6",
     "node-cleanup": "^2.1.2",
     "normalize-url": "^8.1.0",
+    "next": "^14.2.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "hls.js": "^1.5.12",
     "socks-proxy-agent": "^8.0.5",
     "tsx": "^4.20.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/video.js": "^7.3.56"
   }
 }
