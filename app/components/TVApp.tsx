@@ -1,8 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { VideoPlayer } from "./VideoPlayer";
 import { hlsProxyUrl } from "@/lib/hlsProxyUrl";
+import {
+  applyTheme,
+  readFavoritesOrder,
+  readLibrarySync,
+  readRecent,
+  readTheme,
+  writeFavoritesOrder,
+  writeLibrarySync,
+  writeRecent,
+  type RecentEntry,
+  type ThemePref,
+} from "@/lib/browserPrefs";
+import { AuthAccountModal } from "@/app/components/AuthAccountModal";
+import { useFirebaseAuth } from "@/app/contexts/FirebaseAuthContext";
+import { saveUserSettingsDoc } from "@/lib/firebase/userSettingsFirestore";
+import { MAX_RECENT } from "@/lib/browserPrefsConstants";
 
 export type Channel = {
   category: string;
@@ -21,121 +37,7 @@ type Payload = {
 
 type ViewFilter = "all" | "favorites";
 
-type Theme = "dark" | "light";
-
-type RecentEntry = { streamUrl: string; at: number };
-
-/**
- * Favorites are stored only in the browser (localStorage) — ordered list of `streamUrl`.
- */
-const FAV_STORAGE_KEY = "sayem-tv-favorites";
-const LEGACY_FAV_STORAGE_KEY = "iptv-tvstream-favorites";
-const RECENT_STORAGE_KEY = "sayem-tv-recent";
-const THEME_STORAGE_KEY = "sayem-tv-theme";
 const PAGE_SIZE = 72;
-const MAX_RECENT = 20;
-
-function readFavoritesOrder(): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    let raw = localStorage.getItem(FAV_STORAGE_KEY);
-    if (!raw) {
-      raw = localStorage.getItem(LEGACY_FAV_STORAGE_KEY);
-      if (raw) {
-        try {
-          localStorage.setItem(FAV_STORAGE_KEY, raw);
-        } catch {
-          /* quota */
-        }
-      }
-    }
-    if (!raw) return [];
-    const arr = JSON.parse(raw) as unknown;
-    if (!Array.isArray(arr)) return [];
-    const urls = arr.filter((x): x is string => typeof x === "string");
-    const seen = new Set<string>();
-    const out: string[] = [];
-    for (const u of urls) {
-      if (seen.has(u)) continue;
-      seen.add(u);
-      out.push(u);
-    }
-    return out;
-  } catch {
-    return [];
-  }
-}
-
-function writeFavoritesOrder(urls: string[]) {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(FAV_STORAGE_KEY, JSON.stringify(urls));
-  } catch {
-    /* private mode / quota */
-  }
-}
-
-function readRecent(): RecentEntry[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(RECENT_STORAGE_KEY);
-    if (!raw) return [];
-    const arr = JSON.parse(raw) as unknown;
-    if (!Array.isArray(arr)) return [];
-    return arr
-      .filter((x): x is RecentEntry => {
-        if (!x || typeof x !== "object") return false;
-        const o = x as Record<string, unknown>;
-        return typeof o.streamUrl === "string";
-      })
-      .map((x) => {
-        const o = x as RecentEntry;
-        return {
-          streamUrl: o.streamUrl,
-          at: typeof o.at === "number" ? o.at : Date.now(),
-        };
-      })
-      .slice(0, MAX_RECENT);
-  } catch {
-    return [];
-  }
-}
-
-function writeRecent(entries: RecentEntry[]) {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(RECENT_STORAGE_KEY, JSON.stringify(entries));
-  } catch {
-    /* ignore */
-  }
-}
-
-function readTheme(): Theme {
-  if (typeof window === "undefined") return "dark";
-  try {
-    return localStorage.getItem(THEME_STORAGE_KEY) === "light" ? "light" : "dark";
-  } catch {
-    return "dark";
-  }
-}
-
-function applyTheme(theme: Theme) {
-  if (typeof document === "undefined") return;
-  if (theme === "light") document.documentElement.setAttribute("data-theme", "light");
-  else document.documentElement.removeAttribute("data-theme");
-  try {
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
-  } catch {
-    /* ignore */
-  }
-  let meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
-  if (!meta) {
-    meta = document.createElement("meta");
-    meta.name = "theme-color";
-    document.head.appendChild(meta);
-  }
-  meta.content = theme === "light" ? "#e8ebf4" : "#05060d";
-}
 
 function getDefaultCategoryId(channels: Channel[]): string {
   return channels.some((ch) => ch.category === "sports") ? "sports" : "all";
@@ -159,6 +61,8 @@ function reorderArray<T>(arr: T[], from: number, to: number): T[] {
 }
 
 export function TVApp() {
+  const { user, hasFirebaseConfig, authLoading, prefsHydrateVersion, signOutUser } = useFirebaseAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [data, setData] = useState<Payload | null>(null);
   const [loadErr, setLoadErr] = useState<string | null>(null);
   const [cat, setCat] = useState<string>("sports");
@@ -169,7 +73,7 @@ export function TVApp() {
   const [active, setActive] = useState<Channel | null>(null);
   const [origin, setOrigin] = useState("");
   const [recentEntries, setRecentEntries] = useState<RecentEntry[]>([]);
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<ThemePref>("dark");
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
 
@@ -177,11 +81,70 @@ export function TVApp() {
 
   useEffect(() => {
     setOrigin(window.location.origin);
+  }, []);
+
+  useEffect(() => {
     setFavOrder(readFavoritesOrder());
+    setRecentEntries(readRecent());
     const t = readTheme();
     setTheme(t);
     applyTheme(t);
-  }, []);
+    if (!data) return;
+    const lib = readLibrarySync();
+    const defaultCat = getDefaultCategoryId(data.channels);
+    const nextCat =
+      lib.libraryCategory &&
+      (lib.libraryCategory === "all" || data.categories.some((c) => c.id === lib.libraryCategory))
+        ? lib.libraryCategory
+        : defaultCat;
+    const nextView: ViewFilter =
+      lib.libraryView === "favorites" || lib.libraryView === "all" ? lib.libraryView : "all";
+    const nextQ = typeof lib.libraryQuery === "string" ? lib.libraryQuery : "";
+    setCat(nextCat);
+    setView(nextView);
+    setQ(nextQ);
+    const url = lib.lastChannelUrl;
+    const byUrl = url ? data.channels.find((c) => c.streamUrl === url) : undefined;
+    const fallback = data.channels.find((ch) => ch.category === nextCat) ?? data.channels[0];
+    setActive(byUrl ?? fallback ?? null);
+  }, [prefsHydrateVersion, data]);
+
+  const cloudSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!hasFirebaseConfig || !user) return;
+    if (cloudSaveTimer.current) clearTimeout(cloudSaveTimer.current);
+    cloudSaveTimer.current = setTimeout(() => {
+      void saveUserSettingsDoc(user.uid, {
+        favorites: favOrder,
+        recent: recentEntries,
+        theme,
+        lastChannelUrl: active?.streamUrl,
+        libraryView: view,
+        libraryCategory: cat,
+        libraryQuery: q,
+      });
+    }, 1200);
+    return () => {
+      if (cloudSaveTimer.current) clearTimeout(cloudSaveTimer.current);
+    };
+  }, [user, hasFirebaseConfig, favOrder, recentEntries, theme, active?.streamUrl, view, cat, q]);
+
+  const libLocalTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!active) return;
+    if (libLocalTimer.current) clearTimeout(libLocalTimer.current);
+    libLocalTimer.current = setTimeout(() => {
+      writeLibrarySync({
+        lastChannelUrl: active.streamUrl,
+        libraryView: view,
+        libraryCategory: cat,
+        libraryQuery: q,
+      });
+    }, 400);
+    return () => {
+      if (libLocalTimer.current) clearTimeout(libLocalTimer.current);
+    };
+  }, [active, view, cat, q]);
 
   useEffect(() => {
     fetch("/api/channels")
@@ -191,10 +154,6 @@ export function TVApp() {
       })
       .then((j: Payload) => {
         setData(j);
-        const defaultCat = getDefaultCategoryId(j.channels);
-        setCat(defaultCat);
-        const first = j.channels.find((ch) => ch.category === defaultCat) ?? j.channels[0];
-        if (first) setActive(first);
       })
       .catch((e: Error) => setLoadErr(e.message));
   }, []);
@@ -303,7 +262,7 @@ export function TVApp() {
     setRecentEntries([]);
   }, []);
 
-  const setThemeChoice = useCallback((t: Theme) => {
+  const setThemeChoice = useCallback((t: ThemePref) => {
     setTheme(t);
     applyTheme(t);
   }, []);
@@ -382,6 +341,34 @@ export function TVApp() {
           </div>
         </div>
         <div className="header-actions">
+          {hasFirebaseConfig ? (
+            <div className="firebase-auth">
+              {authLoading ? (
+                <span className="firebase-auth-status">Account…</span>
+              ) : user ? (
+                <>
+                  <span className="firebase-auth-email" title={user.email ?? user.uid}>
+                    {user.email ?? "Signed in"}
+                  </span>
+                  <button type="button" className="btn-ghost btn-auth" onClick={() => void signOutUser()}>
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className="btn-ghost btn-auth btn-auth-primary"
+                  onClick={() => setAuthModalOpen(true)}
+                >
+                  Sign in
+                </button>
+              )}
+            </div>
+          ) : (
+            <span className="firebase-auth-status" title="Add NEXT_PUBLIC_FIREBASE_* to .env.local">
+              Cloud off
+            </span>
+          )}
           <div className="theme-toggle" role="group" aria-label="Color theme">
             <button
               type="button"
@@ -529,9 +516,10 @@ export function TVApp() {
         </p>
       ) : null}
 
-      {isFavReorderMode ? (
+          {isFavReorderMode ? (
         <p className="reorder-hint" role="status">
-          Drag the <strong>⋮⋮</strong> handle on each card to reorder favorites. Order is saved on this device only.
+          Drag the <strong>⋮⋮</strong> handle on each card to reorder favorites. Order syncs to your account when signed
+          in.
         </p>
       ) : null}
 
@@ -618,6 +606,8 @@ export function TVApp() {
             : "No channels match your filters."}
         </p>
       ) : null}
+
+      <AuthAccountModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </div>
   );
 }

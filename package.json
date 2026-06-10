@@ -11,9 +11,11 @@
     "merge-github-channels": "node scripts/merge-github-channels.mjs",
     "fix-logos": "node scripts/validate-and-fix-logos.mjs",
     "generate-pwa-icons": "node scripts/generate-pwa-icons.mjs",
-    "list-placeholder-logos": "node scripts/list-placeholder-logos.mjs"
+    "list-placeholder-logos": "node scripts/list-placeholder-logos.mjs",
+    "env:firebase": "node scripts/generate-env-local.mjs"
   },
   "dependencies": {
+    "firebase": "^11.1.0",
     "hls.js": "^1.5.20",
     "next": "^15.1.0",
     "react": "^19.0.0",

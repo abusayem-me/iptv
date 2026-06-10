@@ -5,20 +5,28 @@ Web UI for **SAYEM TV** — browse and play **HLS** (`.m3u8`) channels. The chan
 ## Repository layout
 
 ```
+.cursor/
+  mcp.json              # Firebase MCP for Cursor (firebase-tools)
 app/                    # Next.js App Router (includes manifest.ts → Web App Manifest)
+  contexts/             # FirebaseAuthProvider (Google + Firestore prefs hydrate)
 data/
   channels.json         # Generated channel list (served by GET /api/channels)
   source/               # Parser inputs — not served by the app
     README.md
     channel-directory-export.html   # Replace + re-run parse when you refresh the export
-lib/                    # Shared helpers (HLS rewrite, proxy URL, SSRF checks)
+docs/
+  FIREBASE.md           # MCP + Console + Firestore setup
+lib/                    # Shared helpers (HLS rewrite, proxy URL, SSRF, browser prefs, firebase/)
 scripts/
   parse-channel-export.mjs   # HTML export → channels.json
   merge-github-channels.mjs  # Optional: append new URLs from a remote JSON list
   validate-and-fix-logos.mjs # Optional: verify/fix logoUrl in channels.json
-  list-placeholder-logos.mjs   # Report channels still on the placeholder logo
+  list-placeholder-logos.mjs # Report channels still on the placeholder logo
 public/
   icons/                # PWA / Apple touch icons (PNG)
+firebase.json           # Firebase CLI (Firestore rules deploy)
+firestore.rules
+firestore.indexes.json
 ```
 
 ## Setup
@@ -26,6 +34,12 @@ public/
 ```bash
 npm install
 ```
+
+Copy `.env.example` to `.env.local` and fill values if you use **Firebase** (Google sign-in + Firestore sync). See **[docs/FIREBASE.md](./docs/FIREBASE.md)** for MCP setup, console steps, and rules deployment.
+
+## Firebase MCP (Cursor)
+
+This repo includes **`.cursor/mcp.json`** with the official Firebase MCP (`npx firebase-tools mcp`). After `firebase login`, restart Cursor and confirm the **firebase** MCP is connected. Full steps and troubleshooting: **[docs/FIREBASE.md](./docs/FIREBASE.md)**.
 
 ## Refreshing channels from the HTML export
 
@@ -133,8 +147,8 @@ npm run generate-pwa-icons
 
 - **Favorites** are stored under `sayem-tv-favorites` as an **ordered** JSON array of `streamUrl` strings (order is used in the Favorites view). On first load after the rebrand, data is copied from `iptv-tvstream-favorites` if present. **Drag-and-drop reorder** is available in Favorites when **All categories** is selected and the search box is empty; use the **⋮⋮** handle on each card.
 - **Continue watching** uses `sayem-tv-recent` (last watched channels, newest first, device only). Clear from the strip’s **Clear** control.
-- **Theme** (`dark` default / `light`) is stored under `sayem-tv-theme` and applied to the page before paint when possible (see `app/layout.tsx` boot script).
-- Nothing is written to a server or database for the above; clearing site data or another device starts fresh.
+- **Firebase (optional):** Sign in with **Google** or **email/password** to sync favorites, continue watching, theme, last channel, and library filters to Firestore (`userSettings/{uid}`). New accounts upload existing local data the first time you sign in. See `docs/FIREBASE.md` and `docs/DEPLOY.md`.
+- **Local vs cloud:** This project does not include your own API database. Synced prefs go to **Google Firestore** when signed in; clearing site data only clears this device’s localStorage until you sign in again.
 - Many stream URLs use **time-limited tokens**; when they expire, refresh your export or remote list and regenerate/merge `channels.json`.
 - Playback depends on third-party origins (geo, DRM, provider policy).
 
