@@ -21,17 +21,10 @@ import {
   signOut,
   type User,
 } from "firebase/auth";
-import {
-  applyTheme,
-  readLocalSettingsForCloud,
-  readTheme,
-  writeFavoritesOrder,
-  writeLibrarySync,
-  writeRecent,
-} from "@/lib/browserPrefs";
+import { readLocalSettingsForCloud } from "@/lib/browserPrefs";
 import { getFirebaseAuth, isFirebaseWebConfigured } from "@/lib/firebase/client";
-import { loadUserSettingsDoc, saveUserSettingsDoc, type UserSettingsPayload } from "@/lib/firebase/userSettingsFirestore";
-import type { LibrarySyncState } from "@/lib/browserPrefsConstants";
+import { applyRemoteUserSettingsToLocal } from "@/lib/firebase/applyRemoteSettings";
+import { loadUserSettingsDoc, saveUserSettingsDoc } from "@/lib/firebase/userSettingsFirestore";
 
 function mapAuthError(code: string): string {
   switch (code) {
@@ -54,31 +47,12 @@ function mapAuthError(code: string): string {
   }
 }
 
-function applyRemoteToLocal(remote: UserSettingsPayload) {
-  if (remote.favorites && Array.isArray(remote.favorites)) {
-    writeFavoritesOrder(remote.favorites);
-  }
-  if (remote.recent && Array.isArray(remote.recent)) {
-    writeRecent(remote.recent);
-  }
-  if (remote.theme === "light" || remote.theme === "dark") {
-    applyTheme(remote.theme);
-  } else {
-    applyTheme(readTheme());
-  }
-  const lib: LibrarySyncState = {};
-  if (typeof remote.lastChannelUrl === "string") lib.lastChannelUrl = remote.lastChannelUrl;
-  if (remote.libraryView === "all" || remote.libraryView === "favorites") lib.libraryView = remote.libraryView;
-  if (typeof remote.libraryCategory === "string") lib.libraryCategory = remote.libraryCategory;
-  if (typeof remote.libraryQuery === "string") lib.libraryQuery = remote.libraryQuery;
-  if (Object.keys(lib).length) writeLibrarySync(lib);
-}
-
 type FirebaseAuthContextValue = {
   user: User | null;
   authLoading: boolean;
   hasFirebaseConfig: boolean;
   prefsHydrateVersion: number;
+  bumpPrefsHydrate: () => void;
   authError: string | null;
   clearAuthError: () => void;
   signInWithGoogle: () => Promise<void>;
@@ -108,6 +82,8 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
   const bumpHydrate = useCallback(() => {
     setPrefsHydrateVersion((n) => n + 1);
   }, []);
+
+  const bumpPrefsHydrate = bumpHydrate;
 
   const clearAuthError = useCallback(() => setAuthError(null), []);
 
@@ -150,7 +126,7 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      applyRemoteToLocal(remote);
+      applyRemoteUserSettingsToLocal(remote);
       lastHydratedUid.current = user.uid;
       bumpHydrate();
     })();
@@ -234,6 +210,7 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
       authLoading,
       hasFirebaseConfig,
       prefsHydrateVersion,
+      bumpPrefsHydrate,
       authError,
       clearAuthError,
       signInWithGoogle,
@@ -247,6 +224,7 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
       authLoading,
       hasFirebaseConfig,
       prefsHydrateVersion,
+      bumpPrefsHydrate,
       authError,
       clearAuthError,
       signInWithGoogle,

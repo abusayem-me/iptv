@@ -36,5 +36,5 @@ Google’s **Firebase App Hosting** can run full-stack Next.js apps with tighter
 
 ## After deploy
 
-- Open the live URL, use **Sign in** → Google or email.
+- Open the live URL: **sign in** first — the channel list loads only after authentication. Then use **Sign in** → Google or email.
 - Confirm **Firestore** shows `userSettings/{uid}` documents when you favorite channels or watch something (sync is debounced ~1.2s).

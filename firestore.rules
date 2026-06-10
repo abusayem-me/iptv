@@ -7,6 +7,10 @@ service cloud.firestore {
     match /userSettings/{userId} {
       allow read, update, delete: if request.auth != null && request.auth.uid == userId;
       allow create: if request.auth != null && request.auth.uid == userId;
+
+      match /devices/{deviceId} {
+        allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
+      }
     }
   }
 }

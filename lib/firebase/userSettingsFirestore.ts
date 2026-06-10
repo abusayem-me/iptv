@@ -1,10 +1,11 @@
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import type { LibraryViewPref, RecentEntry, ThemePref } from "@/lib/browserPrefsConstants";
+import type { LibraryViewPref, RecentEntry, ThemePref, WatchHistoryEntry } from "@/lib/browserPrefsConstants";
 import { getFirebaseDb } from "@/lib/firebase/client";
 
 export type UserSettingsPayload = {
   favorites?: string[];
   recent?: RecentEntry[];
+  watchHistory?: WatchHistoryEntry[];
   theme?: ThemePref;
   lastChannelUrl?: string;
   libraryView?: LibraryViewPref;

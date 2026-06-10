@@ -1,5 +1,5 @@
 /**
- * Rasterize public/tv-logo-placeholder.svg into PWA / Apple touch icons.
+ * Rasterize public/brand-mark.svg (same mark as the site header / app icon) into PWA / Apple touch icons.
  * Run after `npm install` (requires devDependency `sharp`).
  */
 import fs from "fs";
@@ -9,7 +9,7 @@ import sharp from "sharp";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
-const svgPath = path.join(root, "public", "tv-logo-placeholder.svg");
+const svgPath = path.join(root, "public", "brand-mark.svg");
 const outDir = path.join(root, "public", "icons");
 
 const bg = { r: 5, g: 6, b: 13, alpha: 1 };

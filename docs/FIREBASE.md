@@ -54,17 +54,17 @@ This repo includes:
    firebase deploy --only firestore:rules
    ```
 
-   Rules live in `firestore.rules`: each user may only read/write `userSettings/{theirUid}`.
+   Rules live in `firestore.rules`: each user may only read/write `userSettings/{theirUid}` and `userSettings/{theirUid}/devices/*`.
 
 ## Part C — What the web app syncs
 
-When Firebase env vars are set and the user clicks **Sign in with Google**:
+When Firebase env vars are set and the user **signs in** (Google or email/password):
 
-- **Firestore document** `userSettings/{uid}` stores `favorites`, `recent`, and `theme` (same shape as localStorage).
+- The **channel list** is fetched only after authentication so playback stays tied to an account.
+- **Firestore document** `userSettings/{uid}` stores `favorites`, `recent`, **`watchHistory`** (deduped channels you opened, up to 120), `theme`, last channel, and library filters. The client keeps this document in **real time sync** (`onSnapshot`) so changes from another device merge into this browser (when the write is not a pending local echo).
+- **Device presence** lives under `userSettings/{uid}/devices/{deviceId}` (one doc per browser / profile). Each device reports **last seen** and **now playing**; the in-app **Profile** drawer lists them. Removing a row deletes that device doc (it may reappear when that browser opens the app again).
 - On sign-in, cloud data is merged into **localStorage** and the UI refreshes.
-- While signed in, changes are **debounced** (~1.2s) and written to Firestore.
-
-Without `.env.local` config, the header shows **Cloud off** and everything stays local-only (unchanged behavior).
+- While signed in, preference changes are **debounced** (~1.2s) and written to Firestore.
 
 Public deployment checklist: **[docs/DEPLOY.md](./DEPLOY.md)** (Vercel + Firebase, authorized domains, rules).
 
@@ -85,5 +85,8 @@ Public deployment checklist: **[docs/DEPLOY.md](./DEPLOY.md)** (Vercel + Firebas
 | `firestore.rules` | Security rules |
 | `lib/firebase/client.ts` | Web SDK init from env |
 | `lib/firebase/userSettingsFirestore.ts` | Read/write `userSettings` |
+| `lib/firebase/applyRemoteSettings.ts` | Merge cloud prefs → localStorage |
+| `lib/firebase/devicePresence.ts` | `devices` subcollection + live subscription |
+| `app/components/ProfileAccountPanel.tsx` | Profile drawer (account + devices) |
 | `app/contexts/FirebaseAuthContext.tsx` | Auth + cloud hydrate |
 | `lib/browserPrefs.ts` | Shared localStorage read/write |

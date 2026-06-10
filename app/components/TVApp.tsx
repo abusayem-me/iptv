@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { doc, onSnapshot } from "firebase/firestore";
 import { VideoPlayer } from "./VideoPlayer";
 import { hlsProxyUrl } from "@/lib/hlsProxyUrl";
 import {
@@ -9,15 +10,29 @@ import {
   readLibrarySync,
   readRecent,
   readTheme,
+  mergeWatchHistoryEntry,
+  readWatchHistory,
   writeFavoritesOrder,
   writeLibrarySync,
   writeRecent,
+  writeWatchHistory,
   type RecentEntry,
   type ThemePref,
+  type WatchHistoryEntry,
 } from "@/lib/browserPrefs";
 import { AuthAccountModal } from "@/app/components/AuthAccountModal";
+import { ProfileAccountPanel } from "@/app/components/ProfileAccountPanel";
 import { useFirebaseAuth } from "@/app/contexts/FirebaseAuthContext";
-import { saveUserSettingsDoc } from "@/lib/firebase/userSettingsFirestore";
+import { applyRemoteUserSettingsToLocal } from "@/lib/firebase/applyRemoteSettings";
+import {
+  removeDevicePresence,
+  subscribeDevicePresence,
+  upsertDevicePresence,
+  type DevicePresenceRow,
+} from "@/lib/firebase/devicePresence";
+import { getFirebaseDb } from "@/lib/firebase/client";
+import { saveUserSettingsDoc, type UserSettingsPayload } from "@/lib/firebase/userSettingsFirestore";
+import { getOrCreateDeviceId, describeClientDevice } from "@/lib/deviceIdentity";
 import { MAX_RECENT } from "@/lib/browserPrefsConstants";
 
 export type Channel = {
@@ -61,8 +76,23 @@ function reorderArray<T>(arr: T[], from: number, to: number): T[] {
 }
 
 export function TVApp() {
-  const { user, hasFirebaseConfig, authLoading, prefsHydrateVersion, signOutUser } = useFirebaseAuth();
+  const { user, hasFirebaseConfig, authLoading, prefsHydrateVersion, signOutUser, bumpPrefsHydrate } = useFirebaseAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [deviceRows, setDeviceRows] = useState<DevicePresenceRow[]>([]);
+  const [remotePlayHint, setRemotePlayHint] = useState<{
+    name: string;
+    url: string;
+    deviceLabel: string;
+  } | null>(null);
+
+  const deviceId = useMemo(() => getOrCreateDeviceId(), []);
+  const deviceMeta = useMemo(() => describeClientDevice(), []);
+
+  const canLoadChannels = useMemo(
+    () => hasFirebaseConfig && !authLoading && !!user,
+    [hasFirebaseConfig, authLoading, user]
+  );
   const [data, setData] = useState<Payload | null>(null);
   const [loadErr, setLoadErr] = useState<string | null>(null);
   const [cat, setCat] = useState<string>("sports");
@@ -73,6 +103,7 @@ export function TVApp() {
   const [active, setActive] = useState<Channel | null>(null);
   const [origin, setOrigin] = useState("");
   const [recentEntries, setRecentEntries] = useState<RecentEntry[]>([]);
+  const [watchHistory, setWatchHistory] = useState<WatchHistoryEntry[]>(() => []);
   const [theme, setTheme] = useState<ThemePref>("dark");
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
@@ -86,6 +117,7 @@ export function TVApp() {
   useEffect(() => {
     setFavOrder(readFavoritesOrder());
     setRecentEntries(readRecent());
+    setWatchHistory(readWatchHistory());
     const t = readTheme();
     setTheme(t);
     applyTheme(t);
@@ -117,6 +149,7 @@ export function TVApp() {
       void saveUserSettingsDoc(user.uid, {
         favorites: favOrder,
         recent: recentEntries,
+        watchHistory,
         theme,
         lastChannelUrl: active?.streamUrl,
         libraryView: view,
@@ -127,7 +160,7 @@ export function TVApp() {
     return () => {
       if (cloudSaveTimer.current) clearTimeout(cloudSaveTimer.current);
     };
-  }, [user, hasFirebaseConfig, favOrder, recentEntries, theme, active?.streamUrl, view, cat, q]);
+  }, [user, hasFirebaseConfig, favOrder, recentEntries, watchHistory, theme, active?.streamUrl, view, cat, q]);
 
   const libLocalTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
@@ -147,7 +180,14 @@ export function TVApp() {
   }, [active, view, cat, q]);
 
   useEffect(() => {
-    fetch("/api/channels")
+    if (!canLoadChannels) {
+      setData(null);
+      setActive(null);
+      setLoadErr(null);
+      return;
+    }
+    const ac = new AbortController();
+    fetch("/api/channels", { signal: ac.signal })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -155,8 +195,76 @@ export function TVApp() {
       .then((j: Payload) => {
         setData(j);
       })
-      .catch((e: Error) => setLoadErr(e.message));
-  }, []);
+      .catch((e: unknown) => {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        const msg = e instanceof Error ? e.message : "Unknown error";
+        setLoadErr(msg);
+      });
+    return () => ac.abort();
+  }, [canLoadChannels]);
+
+  useEffect(() => {
+    if (!hasFirebaseConfig || authLoading || user) return;
+    setAuthModalOpen(true);
+  }, [hasFirebaseConfig, authLoading, user]);
+
+  useEffect(() => {
+    if (!user || !hasFirebaseConfig) return;
+    const db = getFirebaseDb();
+    if (!db) return;
+    const uref = doc(db, "userSettings", user.uid);
+    const unsub = onSnapshot(uref, (snap) => {
+      if (!snap.exists()) return;
+      if (snap.metadata.hasPendingWrites) return;
+      applyRemoteUserSettingsToLocal(snap.data() as UserSettingsPayload);
+      bumpPrefsHydrate();
+    });
+    return () => unsub();
+  }, [user, hasFirebaseConfig, bumpPrefsHydrate]);
+
+  useEffect(() => {
+    if (!user || !hasFirebaseConfig) return;
+    const unsub = subscribeDevicePresence(user.uid, setDeviceRows);
+    return () => {
+      unsub?.();
+    };
+  }, [user, hasFirebaseConfig]);
+
+  useEffect(() => {
+    if (!user || !hasFirebaseConfig) return;
+    const pushPresence = () => {
+      void upsertDevicePresence(user.uid, deviceId, {
+        label: deviceMeta.label,
+        platform: deviceMeta.platform,
+        playingUrl: active?.streamUrl ?? null,
+        playingName: active?.name ?? null,
+      });
+    };
+    pushPresence();
+    const id = window.setInterval(pushPresence, 45_000);
+    return () => clearInterval(id);
+  }, [user, hasFirebaseConfig, deviceId, deviceMeta.label, deviceMeta.platform, active?.streamUrl, active?.name]);
+
+  useEffect(() => {
+    const others = deviceRows.filter(
+      (d) =>
+        d.id !== deviceId &&
+        d.playingUrl &&
+        d.playingName &&
+        d.playingAt &&
+        Date.now() - d.playingAt.toMillis() < 12 * 60 * 1000
+    );
+    const best = [...others].sort((a, b) => (b.playingAt?.toMillis() ?? 0) - (a.playingAt?.toMillis() ?? 0))[0];
+    if (!best?.playingUrl || !best.playingName) {
+      setRemotePlayHint(null);
+      return;
+    }
+    if (best.playingUrl === active?.streamUrl) {
+      setRemotePlayHint(null);
+      return;
+    }
+    setRemotePlayHint({ url: best.playingUrl, name: best.playingName, deviceLabel: best.label });
+  }, [deviceRows, deviceId, active?.streamUrl]);
 
   const categoryLabel = useMemo(() => {
     const m = new Map<string, string>();
@@ -225,7 +333,13 @@ export function TVApp() {
       writeRecent(next);
       return next;
     });
-  }, [data, active?.streamUrl]);
+    setWatchHistory((prev) => {
+      const base = prev.length === 0 ? readWatchHistory() : prev;
+      const next = mergeWatchHistoryEntry(base, active.streamUrl, active.name, Date.now());
+      writeWatchHistory(next);
+      return next;
+    });
+  }, [data, active?.streamUrl, active?.name]);
 
   const proxiedSrc = useMemo(() => {
     if (!active || !origin) return "";
@@ -317,84 +431,222 @@ export function TVApp() {
   const hasActiveFilters =
     !!data && (cat !== defaultCatId || q.trim() !== "" || view !== "all");
 
+  const profileFavoriteRows = useMemo(() => {
+    if (!data) return [];
+    const byUrl = new Map(data.channels.map((ch) => [ch.streamUrl, ch]));
+    return favOrder.map((url) => byUrl.get(url)).filter((ch): ch is Channel => !!ch);
+  }, [data, favOrder]);
+
+  const profileWatchedRows = useMemo(() => {
+    return watchHistory.map((h) => {
+      if (!data) {
+        return {
+          streamUrl: h.streamUrl,
+          name: h.name,
+          logoUrl: "",
+          logoAlt: "",
+          lastAt: h.lastAt,
+        };
+      }
+      const ch = data.channels.find((c) => c.streamUrl === h.streamUrl);
+      return ch
+        ? { streamUrl: ch.streamUrl, name: ch.name, logoUrl: ch.logoUrl, logoAlt: ch.logoAlt, lastAt: h.lastAt }
+        : { streamUrl: h.streamUrl, name: h.name, logoUrl: "", logoAlt: "", lastAt: h.lastAt };
+    });
+  }, [data, watchHistory]);
+
+  const profileDrawer =
+    user && hasFirebaseConfig ? (
+      <ProfileAccountPanel
+        open={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        user={user}
+        thisDeviceId={deviceId}
+        devices={deviceRows}
+        onRemoveDevice={(id) => void removeDevicePresence(user.uid, id)}
+        favorites={profileFavoriteRows.map((ch) => ({
+          streamUrl: ch.streamUrl,
+          name: ch.name,
+          logoUrl: ch.logoUrl,
+        }))}
+        watched={profileWatchedRows}
+        canPlay={!!data}
+        onPlayChannel={(streamUrl) => {
+          if (!data) return;
+          const ch = data.channels.find((c) => c.streamUrl === streamUrl);
+          if (ch) setActive(ch);
+          setProfileOpen(false);
+        }}
+      />
+    ) : null;
+
+  const siteHeader = (
+    <header className="site-header">
+      <div className="brand">
+          <img className="brand-mark" src="/brand-mark.svg" alt="" width={44} height={44} decoding="async" />
+        <div>
+          <h1>SAYEM TV</h1>
+          <p className="tagline">Live channels in your browser</p>
+        </div>
+      </div>
+      <div className="header-actions">
+        {hasFirebaseConfig ? (
+          <div className="firebase-auth">
+            {authLoading ? (
+              <span className="firebase-auth-status">Account…</span>
+            ) : user ? (
+              <>
+                <span className="firebase-auth-email" title={user.email ?? user.uid}>
+                  {user.email ?? "Signed in"}
+                </span>
+                <button type="button" className="btn-ghost btn-auth" onClick={() => setProfileOpen(true)}>
+                  Profile
+                </button>
+                <button type="button" className="btn-ghost btn-auth" onClick={() => void signOutUser()}>
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="btn-ghost btn-auth btn-auth-primary"
+                onClick={() => setAuthModalOpen(true)}
+              >
+                Sign in
+              </button>
+            )}
+          </div>
+        ) : (
+          <span className="firebase-auth-status" title="Add NEXT_PUBLIC_FIREBASE_* to .env.local">
+            Cloud off
+          </span>
+        )}
+        <div className="theme-toggle" role="group" aria-label="Color theme">
+          <button
+            type="button"
+            className={theme === "dark" ? "active" : ""}
+            onClick={() => setThemeChoice("dark")}
+            aria-pressed={theme === "dark"}
+          >
+            Dark
+          </button>
+          <button
+            type="button"
+            className={theme === "light" ? "active" : ""}
+            onClick={() => setThemeChoice("light")}
+            aria-pressed={theme === "light"}
+          >
+            Light
+          </button>
+        </div>
+        {active ? (
+          <div className="now-playing" aria-live="polite">
+            <span className="np-label">Now playing</span>
+            <span className="np-title">{active.name}</span>
+          </div>
+        ) : null}
+      </div>
+    </header>
+  );
+
+  if (!hasFirebaseConfig) {
+    return (
+      <div className="tv-layout">
+        {siteHeader}
+        <div className="auth-gate notice error">
+          <h2 className="auth-gate-title">Firebase is not configured</h2>
+          <p>
+            Add <code>NEXT_PUBLIC_FIREBASE_*</code> variables (see <code>docs/FIREBASE.md</code>) so sign-in and sync
+            work. The channel library is only available to signed-in users.
+          </p>
+        </div>
+        {profileDrawer}
+      </div>
+    );
+  }
+
+  if (authLoading) {
+    return (
+      <div className="tv-layout">
+        {siteHeader}
+        <div className="notice">Checking your account…</div>
+        {profileDrawer}
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="tv-layout">
+        {siteHeader}
+        <section className="auth-gate" aria-labelledby="auth-gate-heading">
+          <h2 id="auth-gate-heading" className="auth-gate-title">
+            Sign in to watch
+          </h2>
+          <p className="auth-gate-copy">
+            Create an account or sign in with Google so your favorites, continue watching, and library sync across all
+            your devices.
+          </p>
+          <button type="button" className="btn-auth btn-auth-primary auth-gate-cta" onClick={() => setAuthModalOpen(true)}>
+            Sign in or create account
+          </button>
+        </section>
+        <AuthAccountModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+        {profileDrawer}
+      </div>
+    );
+  }
+
   if (loadErr) {
     return (
-      <div className="notice error">
-        Could not load channel list ({loadErr}). Ensure <code>data/channels.json</code> exists — run{" "}
-        <code>npm run parse-channels</code>.
+      <div className="tv-layout">
+        {siteHeader}
+        <div className="notice error">
+          Could not load channel list ({loadErr}). Ensure <code>data/channels.json</code> exists — run{" "}
+          <code>npm run parse-channels</code>.
+        </div>
+        <AuthAccountModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+        {profileDrawer}
       </div>
     );
   }
 
   if (!data) {
-    return <div className="notice">Loading channels…</div>;
+    return (
+      <div className="tv-layout">
+        {siteHeader}
+        <div className="notice">Loading channels…</div>
+        <AuthAccountModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+        {profileDrawer}
+      </div>
+    );
   }
 
   return (
     <div className="tv-layout">
-      <header className="site-header">
-        <div className="brand">
-          <span className="brand-mark" aria-hidden />
-          <div>
-            <h1>SAYEM TV</h1>
-            <p className="tagline">Live channels in your browser</p>
-          </div>
+      {siteHeader}
+
+      {remotePlayHint ? (
+        <div className="cross-play-banner" role="status">
+          <span className="cross-play-text">
+            <strong>{remotePlayHint.deviceLabel}</strong> is playing <strong>{remotePlayHint.name}</strong>
+          </span>
+          <button
+            type="button"
+            className="btn-cross-play"
+            onClick={() => {
+              const ch = data.channels.find((c) => c.streamUrl === remotePlayHint.url);
+              if (ch) setActive(ch);
+              setRemotePlayHint(null);
+            }}
+          >
+            Watch here
+          </button>
+          <button type="button" className="btn-cross-dismiss" onClick={() => setRemotePlayHint(null)} aria-label="Dismiss">
+            ×
+          </button>
         </div>
-        <div className="header-actions">
-          {hasFirebaseConfig ? (
-            <div className="firebase-auth">
-              {authLoading ? (
-                <span className="firebase-auth-status">Account…</span>
-              ) : user ? (
-                <>
-                  <span className="firebase-auth-email" title={user.email ?? user.uid}>
-                    {user.email ?? "Signed in"}
-                  </span>
-                  <button type="button" className="btn-ghost btn-auth" onClick={() => void signOutUser()}>
-                    Sign out
-                  </button>
-                </>
-              ) : (
-                <button
-                  type="button"
-                  className="btn-ghost btn-auth btn-auth-primary"
-                  onClick={() => setAuthModalOpen(true)}
-                >
-                  Sign in
-                </button>
-              )}
-            </div>
-          ) : (
-            <span className="firebase-auth-status" title="Add NEXT_PUBLIC_FIREBASE_* to .env.local">
-              Cloud off
-            </span>
-          )}
-          <div className="theme-toggle" role="group" aria-label="Color theme">
-            <button
-              type="button"
-              className={theme === "dark" ? "active" : ""}
-              onClick={() => setThemeChoice("dark")}
-              aria-pressed={theme === "dark"}
-            >
-              Dark
-            </button>
-            <button
-              type="button"
-              className={theme === "light" ? "active" : ""}
-              onClick={() => setThemeChoice("light")}
-              aria-pressed={theme === "light"}
-            >
-              Light
-            </button>
-          </div>
-          {active ? (
-            <div className="now-playing" aria-live="polite">
-              <span className="np-label">Now playing</span>
-              <span className="np-title">{active.name}</span>
-            </div>
-          ) : null}
-        </div>
-      </header>
+      ) : null}
 
       <section className="player-section">
         {active && proxiedSrc ? (
@@ -608,6 +860,7 @@ export function TVApp() {
       ) : null}
 
       <AuthAccountModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+      {profileDrawer}
     </div>
   );
 }

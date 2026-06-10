@@ -146,8 +146,9 @@ npm run generate-pwa-icons
 ## Notes
 
 - **Favorites** are stored under `sayem-tv-favorites` as an **ordered** JSON array of `streamUrl` strings (order is used in the Favorites view). On first load after the rebrand, data is copied from `iptv-tvstream-favorites` if present. **Drag-and-drop reorder** is available in Favorites when **All categories** is selected and the search box is empty; use the **⋮⋮** handle on each card.
-- **Continue watching** uses `sayem-tv-recent` (last watched channels, newest first, device only). Clear from the strip’s **Clear** control.
-- **Firebase (optional):** Sign in with **Google** or **email/password** to sync favorites, continue watching, theme, last channel, and library filters to Firestore (`userSettings/{uid}`). New accounts upload existing local data the first time you sign in. See `docs/FIREBASE.md` and `docs/DEPLOY.md`.
+- **Continue watching** uses `sayem-tv-recent` (last watched channels, newest first). When signed in, it syncs across devices via Firestore with your other library data. Clear from the strip’s **Clear** control.
+- **Firebase:** You must **sign in** before the channel list loads. Favorites, continue watching, theme, last channel, and filters sync in real time from `userSettings/{uid}`. See `docs/FIREBASE.md` and `docs/DEPLOY.md`.
+- **Profile & devices:** After sign-in, **Profile** lists **favorites**, **watched channels** (synced history), and **connected devices**. Another device’s playback can show a **Watch here** banner. **Firestore rules** include `userSettings/{uid}/devices/*` — run `firebase deploy --only firestore:rules` if you fork the project.
 - **Local vs cloud:** This project does not include your own API database. Synced prefs go to **Google Firestore** when signed in; clearing site data only clears this device’s localStorage until you sign in again.
 - Many stream URLs use **time-limited tokens**; when they expire, refresh your export or remote list and regenerate/merge `channels.json`.
 - Playback depends on third-party origins (geo, DRM, provider policy).

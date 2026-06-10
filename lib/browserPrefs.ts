@@ -3,15 +3,18 @@ import {
   LEGACY_FAV_STORAGE_KEY,
   LIBRARY_SYNC_KEY,
   MAX_RECENT,
+  MAX_WATCH_HISTORY,
   RECENT_STORAGE_KEY,
   THEME_STORAGE_KEY,
+  WATCH_HISTORY_KEY,
   type LibrarySyncState,
   type LibraryViewPref,
   type RecentEntry,
   type ThemePref,
+  type WatchHistoryEntry,
 } from "@/lib/browserPrefsConstants";
 
-export type { RecentEntry, ThemePref, LibrarySyncState, LibraryViewPref };
+export type { RecentEntry, ThemePref, LibrarySyncState, LibraryViewPref, WatchHistoryEntry };
 
 export function readFavoritesOrder(): string[] {
   if (typeof window === "undefined") return [];
@@ -88,6 +91,59 @@ export function writeRecent(entries: RecentEntry[]) {
   }
 }
 
+function isWatchHistoryEntry(x: unknown): x is WatchHistoryEntry {
+  if (!x || typeof x !== "object") return false;
+  const o = x as Record<string, unknown>;
+  return typeof o.streamUrl === "string" && typeof o.name === "string" && typeof o.lastAt === "number";
+}
+
+export function readWatchHistory(): WatchHistoryEntry[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(WATCH_HISTORY_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw) as unknown;
+    if (!Array.isArray(arr)) return [];
+    const out = arr.filter(isWatchHistoryEntry);
+    return out.sort((a, b) => b.lastAt - a.lastAt).slice(0, MAX_WATCH_HISTORY);
+  } catch {
+    return [];
+  }
+}
+
+export function writeWatchHistory(entries: WatchHistoryEntry[]) {
+  if (typeof window === "undefined") return;
+  try {
+    const sorted = [...entries].sort((a, b) => b.lastAt - a.lastAt).slice(0, MAX_WATCH_HISTORY);
+    localStorage.setItem(WATCH_HISTORY_KEY, JSON.stringify(sorted));
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Merge two watch logs (e.g. local + remote); keeps latest `lastAt` per URL. */
+export function mergeWatchHistories(a: WatchHistoryEntry[], b: WatchHistoryEntry[]): WatchHistoryEntry[] {
+  const map = new Map<string, WatchHistoryEntry>();
+  for (const e of [...a, ...b]) {
+    if (!e.streamUrl) continue;
+    const cur = map.get(e.streamUrl);
+    const name = (e.name || cur?.name || "Channel").trim() || "Channel";
+    const lastAt = Math.max(e.lastAt, cur?.lastAt ?? 0);
+    map.set(e.streamUrl, { streamUrl: e.streamUrl, name, lastAt });
+  }
+  return [...map.values()].sort((x, y) => y.lastAt - x.lastAt).slice(0, MAX_WATCH_HISTORY);
+}
+
+export function mergeWatchHistoryEntry(
+  entries: WatchHistoryEntry[],
+  streamUrl: string,
+  name: string,
+  at: number
+): WatchHistoryEntry[] {
+  const rest = entries.filter((e) => e.streamUrl !== streamUrl);
+  return [{ streamUrl, name: name.trim() || "Channel", lastAt: at }, ...rest].slice(0, MAX_WATCH_HISTORY);
+}
+
 export function readTheme(): ThemePref {
   if (typeof window === "undefined") return "dark";
   try {
@@ -153,6 +209,7 @@ export function clearLibrarySync() {
 export function readLocalSettingsForCloud(): {
   favorites: string[];
   recent: RecentEntry[];
+  watchHistory: WatchHistoryEntry[];
   theme: ThemePref;
   lastChannelUrl?: string;
   libraryView?: LibraryViewPref;
@@ -163,6 +220,7 @@ export function readLocalSettingsForCloud(): {
   return {
     favorites: readFavoritesOrder(),
     recent: readRecent(),
+    watchHistory: readWatchHistory(),
     theme: readTheme(),
     lastChannelUrl: lib.lastChannelUrl,
     libraryView: lib.libraryView,
