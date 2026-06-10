@@ -1,134 +1,99 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from "next/server";
+import { rewriteM3u8 } from "@/lib/rewriteM3u8";
+import { isBlockedHostname } from "@/lib/ssrf";
 
-/**
- * HLS Proxy that handles both manifest and segment requests
- * This is needed because HLS streams require multiple requests for segments
- */
-export async function GET(request: NextRequest) {
+export const runtime = "nodejs";
+
+function looksLikeM3u8(contentType: string | null, peek: string): boolean {
+  if (contentType?.includes("application/vnd.apple.mpegurl")) return true;
+  if (contentType?.includes("application/x-mpegURL")) return true;
+  if (contentType?.includes("audio/mpegurl")) return true;
+  const s = peek.trimStart();
+  return s.startsWith("#EXTM3U");
+}
+
+export async function GET(req: NextRequest) {
+  const raw = req.nextUrl.searchParams.get("url");
+  if (!raw) {
+    return NextResponse.json({ error: "missing url query" }, { status: 400 });
+  }
+
+  let target: URL;
   try {
-    const { searchParams } = new URL(request.url)
-    const url = searchParams.get('url')
-    const userAgent = searchParams.get('userAgent') || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    const referrer = searchParams.get('referrer')
+    target = new URL(raw);
+  } catch {
+    return NextResponse.json({ error: "invalid url" }, { status: 400 });
+  }
 
-    if (!url) {
-      return NextResponse.json(
-        { error: 'URL parameter is required' },
-        { status: 400 }
-      )
-    }
+  if (target.protocol !== "https:" && target.protocol !== "http:") {
+    return NextResponse.json({ error: "only http(s)" }, { status: 400 });
+  }
 
-    // Validate URL
-    let streamUrl: URL
-    try {
-      streamUrl = new URL(url)
-    } catch {
-      return NextResponse.json(
-        { error: 'Invalid URL' },
-        { status: 400 }
-      )
-    }
+  if (isBlockedHostname(target.hostname)) {
+    return NextResponse.json({ error: "host not allowed" }, { status: 403 });
+  }
 
-    // Fetch the stream with proper headers
-    const headers: HeadersInit = {
-      'User-Agent': userAgent,
-      'Accept': '*/*',
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Cache-Control': 'no-cache',
-    }
+  const origin = req.nextUrl.origin;
 
-    if (referrer) {
-      headers['Referer'] = referrer
-      try {
-        headers['Origin'] = new URL(referrer).origin
-      } catch {
-        // Ignore invalid referrer
-      }
-    }
+  let upstream: Response;
+  try {
+    upstream = await fetch(target.href, {
+      redirect: "follow",
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept: "*/*",
+      },
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "fetch failed";
+    return NextResponse.json({ error: msg }, { status: 502 });
+  }
 
-    const response = await fetch(url, {
-      headers,
-      method: 'GET',
-      redirect: 'follow',
-    })
+  if (!upstream.ok) {
+    const t = await upstream.text().catch(() => "");
+    return new NextResponse(t || upstream.statusText, { status: upstream.status });
+  }
 
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: `Failed to fetch: ${response.status} ${response.statusText}` },
-        { status: response.status }
-      )
-    }
+  const ct = upstream.headers.get("content-type");
+  const buf = Buffer.from(await upstream.arrayBuffer());
+  const peek = buf.slice(0, Math.min(2048, buf.length)).toString("utf8");
 
-    const contentType = response.headers.get('content-type') || 'application/octet-stream'
-    let body = await response.text()
+  const cors = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
+  };
 
-    // If it's an HLS manifest (.m3u8), rewrite URLs to use our proxy
-    if (contentType.includes('application/vnd.apple.mpegurl') || 
-        contentType.includes('application/x-mpegURL') || 
-        url.endsWith('.m3u8') ||
-        body.includes('#EXTM3U') ||
-        body.includes('#EXTINF')) {
-      
-      const baseUrl = new URL(url)
-      const proxyBase = `${request.nextUrl.origin}/api/hls-proxy`
-      
-      // Rewrite URLs in the manifest - handle both segment files and nested playlists
-      body = body.split('\n').map(line => {
-        const trimmedLine = line.trim()
-        
-        // Skip comments, empty lines, and tags
-        if (trimmedLine.startsWith('#') || !trimmedLine) {
-          return line
-        }
-        
-        // Handle absolute URLs
-        if (trimmedLine.startsWith('http://') || trimmedLine.startsWith('https://')) {
-          return line.replace(trimmedLine, `${proxyBase}?url=${encodeURIComponent(trimmedLine)}`)
-        }
-        
-        // Handle relative URLs (segments, nested playlists)
-        try {
-          // Build absolute URL from relative path
-          const pathParts = baseUrl.pathname.split('/')
-          pathParts.pop() // Remove filename
-          const basePath = pathParts.join('/')
-          const absoluteUrl = new URL(trimmedLine, `${baseUrl.origin}${basePath}/`)
-          return line.replace(trimmedLine, `${proxyBase}?url=${encodeURIComponent(absoluteUrl.toString())}`)
-        } catch (e) {
-          // If URL construction fails, return original line
-          return line
-        }
-      }).join('\n')
-    }
-
-    return new NextResponse(body, {
+  if (looksLikeM3u8(ct, peek)) {
+    const text = buf.toString("utf8");
+    const rewritten = rewriteM3u8(text, target.href, origin);
+    return new NextResponse(rewritten, {
       status: 200,
       headers: {
-        'Content-Type': contentType,
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'X-Content-Type-Options': 'nosniff',
+        ...cors,
+        "Content-Type": "application/vnd.apple.mpegurl; charset=utf-8",
+        "Cache-Control": "no-cache, no-store, must-revalidate",
       },
-    })
-  } catch (error) {
-    console.error('HLS Proxy error:', error)
-    return NextResponse.json(
-      { error: 'Failed to proxy stream' },
-      { status: 500 }
-    )
+    });
   }
+
+  return new NextResponse(buf, {
+    status: 200,
+    headers: {
+      ...cors,
+      "Content-Type": ct || "application/octet-stream",
+      "Cache-Control": "public, max-age=60",
+    },
+  });
 }
 
 export async function OPTIONS() {
   return new NextResponse(null, {
-    status: 200,
+    status: 204,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
     },
-  })
+  });
 }
-
