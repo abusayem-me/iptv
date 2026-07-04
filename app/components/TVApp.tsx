@@ -133,7 +133,8 @@ export function TVApp() {
   const favSet = useMemo(() => new Set(favOrder), [favOrder]);
 
   useEffect(() => {
-    setOrigin(window.location.origin);
+    const fromEnv = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+    setOrigin(fromEnv || window.location.origin);
   }, []);
 
   useEffect(() => {

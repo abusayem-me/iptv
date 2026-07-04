@@ -47,8 +47,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${space.variable} ${inter.variable}`} suppressHydrationWarning>
-      <body>
+                        <html lang="en" className={`${space.variable} ${inter.variable}`} suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <Script id="sayem-theme-boot" strategy="beforeInteractive">
           {`try{var t=localStorage.getItem('sayem-tv-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}`}
         </Script>

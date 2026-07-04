@@ -18,6 +18,14 @@ The app is a **Next.js** project with **API routes** (`/api/channels`, `/api/hls
 2. **Environment variables on Vercel**  
    Project → Settings → Environment Variables → add every `NEXT_PUBLIC_FIREBASE_*` from your local `.env.local` (same values as the Firebase Web app config).
 
+   Also set your public site URL (used for HLS proxy playlist rewriting):
+
+   ```
+   NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
+   ```
+
+   Use your production domain (no trailing slash). Without this, child playlist URLs in rewritten `.m3u8` files may point at the wrong host.
+
 3. **Deploy**
 
    ```bash

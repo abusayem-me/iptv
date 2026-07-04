@@ -1,0 +1,11 @@
+{
+  "functions": {
+    "app/api/hls-proxy/route.ts": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
+    "app/api/check-stream/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}

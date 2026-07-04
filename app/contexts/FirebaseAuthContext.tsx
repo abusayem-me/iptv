@@ -74,10 +74,14 @@ export function useFirebaseAuth(): FirebaseAuthContextValue {
 
 export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [clientReady, setClientReady] = useState(false);
+  const [authPending, setAuthPending] = useState(true);
   const [prefsHydrateVersion, setPrefsHydrateVersion] = useState(0);
   const [authError, setAuthError] = useState<string | null>(null);
   const hasFirebaseConfig = isFirebaseWebConfigured();
+
+  /** True until client mount + first Firebase auth resolution (avoids SSR hydration mismatch). */
+  const authLoading = !clientReady || authPending;
 
   const bumpHydrate = useCallback(() => {
     setPrefsHydrateVersion((n) => n + 1);
@@ -88,18 +92,22 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
   const clearAuthError = useCallback(() => setAuthError(null), []);
 
   useEffect(() => {
+    setClientReady(true);
+  }, []);
+
+  useEffect(() => {
     if (!hasFirebaseConfig) {
-      setAuthLoading(false);
+      setAuthPending(false);
       return;
     }
     const auth = getFirebaseAuth();
     if (!auth) {
-      setAuthLoading(false);
+      setAuthPending(false);
       return;
     }
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
-      setAuthLoading(false);
+      setAuthPending(false);
     });
     return () => unsub();
   }, [hasFirebaseConfig]);
