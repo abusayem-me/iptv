@@ -1,12 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="SAYEM TV">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Channel logo unavailable">
   <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1a1d35"/>
-      <stop offset="100%" style="stop-color:#0a0c18"/>
+    <linearGradient id="ph-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a1d35"/>
+      <stop offset="100%" stop-color="#0a0c18"/>
+    </linearGradient>
+    <linearGradient id="ph-accent" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00e5ff"/>
+      <stop offset="100%" stop-color="#ff2e96"/>
     </linearGradient>
   </defs>
-  <rect width="128" height="128" rx="20" fill="url(#g)"/>
-  <rect x="22" y="36" width="84" height="60" rx="8" fill="none" stroke="#00e5ff" stroke-width="3" opacity="0.9"/>
-  <path d="M44 36 L64 22 L84 36" fill="none" stroke="#8b91b8" stroke-width="2.5" stroke-linecap="round"/>
-  <circle cx="64" cy="66" r="10" fill="none" stroke="#ff2e96" stroke-width="2.5" opacity="0.85"/>
+  <rect width="128" height="128" rx="20" fill="url(#ph-bg)"/>
+  <rect x="1.5" y="1.5" width="125" height="125" rx="18.5" fill="none" stroke="url(#ph-accent)" stroke-width="1.5" opacity="0.35"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M64 38V28" stroke="#8b91b8" stroke-width="2.5"/>
+    <path d="M56 32L64 24L72 32" stroke="#8b91b8" stroke-width="2.5"/>
+    <rect x="34" y="40" width="60" height="42" rx="7" stroke="#00e5ff" stroke-width="2.5" opacity="0.85"/>
+    <path d="M64 82V90" stroke="#8b91b8" stroke-width="2.2"/>
+    <path d="M48 90H80" stroke="#8b91b8" stroke-width="2.5"/>
+  </g>
+  <path d="M54 54L54 68L70 61Z" fill="#ff2e96" opacity="0.9"/>
 </svg>

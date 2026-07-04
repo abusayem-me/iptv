@@ -54,7 +54,7 @@ This repo includes:
    firebase deploy --only firestore:rules
    ```
 
-   Rules live in `firestore.rules`: each user may only read/write `userSettings/{theirUid}` and `userSettings/{theirUid}/devices/*`.
+   Rules live in `firestore.rules`: each user may only read/write `userSettings/{theirUid}` and `userSettings/{theirUid}/devices/*`. **Global stream health** (`streamHealth/*`, `categoryHealth/*`) is readable by any signed-in user; any signed-in user may update labels when running a check or playing a channel.
 
 ## Part C — What the web app syncs
 
@@ -65,6 +65,7 @@ When Firebase env vars are set and the user **signs in** (Google or email/passwo
 - **Device presence** lives under `userSettings/{uid}/devices/{deviceId}` (one doc per browser / profile). Each device reports **last seen** and **now playing**; the in-app **Profile** drawer lists them. Removing a row deletes that device doc (it may reappear when that browser opens the app again).
 - On sign-in, cloud data is merged into **localStorage** and the UI refreshes.
 - While signed in, preference changes are **debounced** (~1.2s) and written to Firestore.
+- **Global stream health** (live/dead labels) is stored in Firestore (`streamHealth/{id}` per stream, `categoryHealth/{categoryId}` for last check stats). All signed-in users share the same labels; updates sync in **real time** when anyone runs a category check or when playback confirms a stream is live or dead.
 
 Public deployment checklist: **[docs/DEPLOY.md](./DEPLOY.md)** (Vercel + Firebase, authorized domains, rules).
 

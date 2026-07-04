@@ -41,6 +41,7 @@ export const metadata: Metadata = {
     siteName: "SAYEM TV",
     title: "SAYEM TV",
     description: "SAYEM TV — browse and play live HLS channels",
+    images: [{ url: "/icons/icon-512.png", width: 512, height: 512, alt: "SAYEM TV" }],
   },
 };
 

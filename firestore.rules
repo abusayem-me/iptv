@@ -12,5 +12,19 @@ service cloud.firestore {
         allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
       }
     }
+
+    // Global stream live/dead labels — shared by all signed-in users.
+    match /streamHealth/{streamId} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null
+        && request.resource.data.keys().hasAll(['streamUrl', 'categoryId', 'status', 'source'])
+        && request.resource.data.status in ['live', 'dead']
+        && request.resource.data.source in ['check', 'playback'];
+    }
+
+    match /categoryHealth/{categoryId} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null;
+    }
   }
 }

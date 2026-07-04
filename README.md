@@ -131,7 +131,7 @@ For correct absolute URLs in metadata when you deploy, set your public origin (e
 NEXT_PUBLIC_APP_URL=https://your-domain.com
 ```
 
-After changing `public/tv-logo-placeholder.svg`, regenerate PNGs:
+After changing `public/brand-mark.svg`, regenerate PNGs:
 
 ```bash
 npm run generate-pwa-icons

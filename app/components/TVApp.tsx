@@ -20,6 +20,7 @@ import {
   type ThemePref,
   type WatchHistoryEntry,
 } from "@/lib/browserPrefs";
+import { ChannelFilterPanel } from "@/app/components/ChannelFilterPanel";
 import { AuthAccountModal } from "@/app/components/AuthAccountModal";
 import { ProfileAccountPanel } from "@/app/components/ProfileAccountPanel";
 import { useFirebaseAuth } from "@/app/contexts/FirebaseAuthContext";
@@ -34,6 +35,14 @@ import { getFirebaseDb } from "@/lib/firebase/client";
 import { saveUserSettingsDoc, type UserSettingsPayload } from "@/lib/firebase/userSettingsFirestore";
 import { getOrCreateDeviceId, describeClientDevice } from "@/lib/deviceIdentity";
 import { MAX_RECENT } from "@/lib/browserPrefsConstants";
+import { runChannelHealthCheck, type HealthCheckStats, type StreamHealth } from "@/lib/runChannelHealthCheck";
+import {
+  subscribeCategoryHealthSummary,
+  subscribeCategoryStreamHealth,
+  upsertStreamHealthBatch,
+  upsertStreamHealthFromPlayback,
+  writeCategoryHealthSummary,
+} from "@/lib/firebase/streamHealthFirestore";
 
 export type Channel = {
   category: string;
@@ -51,6 +60,8 @@ type Payload = {
 };
 
 type ViewFilter = "all" | "favorites";
+
+type HealthFilter = "all" | "live" | "dead";
 
 const PAGE_SIZE = 72;
 
@@ -107,6 +118,17 @@ export function TVApp() {
   const [theme, setTheme] = useState<ThemePref>("dark");
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+  const [streamHealth, setStreamHealth] = useState<Map<string, StreamHealth>>(() => new Map());
+  const [checkRunning, setCheckRunning] = useState(false);
+  const [checkStats, setCheckStats] = useState<HealthCheckStats | null>(null);
+  const [healthFilter, setHealthFilter] = useState<HealthFilter>("all");
+  const [healthCheckedAt, setHealthCheckedAt] = useState<number | null>(null);
+  const checkAbortRef = useRef<AbortController | null>(null);
+  const checkRunningRef = useRef(false);
+
+  useEffect(() => {
+    checkRunningRef.current = checkRunning;
+  }, [checkRunning]);
 
   const favSet = useMemo(() => new Set(favOrder), [favOrder]);
 
@@ -305,9 +327,158 @@ export function TVApp() {
     return list;
   }, [data, cat, q, view, favOrder, categoryLabel]);
 
+  const categoryCheckTargets = useMemo(() => {
+    if (!data) return [];
+    if (cat === "all") return data.channels;
+    return data.channels.filter((ch) => ch.category === cat);
+  }, [data, cat]);
+
+  const checkTargetByUrl = useMemo(
+    () => new Map(categoryCheckTargets.map((ch) => [ch.streamUrl, ch])),
+    [categoryCheckTargets]
+  );
+
+  const healthFiltered = useMemo(() => {
+    if (healthFilter === "all" || streamHealth.size === 0) return filtered;
+    return filtered.filter((ch) => {
+      const h = streamHealth.get(ch.streamUrl);
+      if (healthFilter === "live") return h === "live";
+      if (healthFilter === "dead") return h === "dead";
+      return true;
+    });
+  }, [filtered, healthFilter, streamHealth]);
+
+  useEffect(() => {
+    checkAbortRef.current?.abort();
+    checkAbortRef.current = null;
+    setCheckRunning(false);
+    setHealthFilter("all");
+
+    if (!user || !hasFirebaseConfig) {
+      setStreamHealth(new Map());
+      setCheckStats(null);
+      setHealthCheckedAt(null);
+      return;
+    }
+
+    const unsubStreams = subscribeCategoryStreamHealth(cat, (map) => {
+      if (checkRunningRef.current) return;
+      setStreamHealth(map);
+      if (map.size > 0) {
+        let live = 0;
+        let dead = 0;
+        for (const s of map.values()) {
+          if (s === "live") live++;
+          else dead++;
+        }
+        setCheckStats((prev) => {
+          const total = prev?.total ?? map.size;
+          return { done: map.size, total, live, dead };
+        });
+      }
+    });
+
+    const unsubSummary = subscribeCategoryHealthSummary(cat, (checkedAt, stats) => {
+      if (checkRunningRef.current) return;
+      setHealthCheckedAt(checkedAt);
+      if (stats) setCheckStats(stats);
+    });
+
+    return () => {
+      unsubStreams?.();
+      unsubSummary?.();
+    };
+  }, [cat, user, hasFirebaseConfig]);
+
+  const startHealthCheck = useCallback(async () => {
+    if (!origin || !user || categoryCheckTargets.length === 0 || checkRunning) return;
+    checkAbortRef.current?.abort();
+    const ac = new AbortController();
+    checkAbortRef.current = ac;
+    setCheckRunning(true);
+    setHealthFilter("all");
+    setStreamHealth(new Map());
+    setHealthCheckedAt(null);
+    setCheckStats({ done: 0, total: categoryCheckTargets.length, live: 0, dead: 0 });
+
+    try {
+      const results = await runChannelHealthCheck(origin, categoryCheckTargets, {
+        signal: ac.signal,
+        onUpdate: (streamUrl, health, stats) => {
+          setStreamHealth((prev) => {
+            const next = new Map(prev);
+            next.set(streamUrl, health);
+            return next;
+          });
+          setCheckStats(stats);
+        },
+        onBatchComplete: (batch) => {
+          const entries = Array.from(batch.entries())
+            .filter(([, h]) => h === "live" || h === "dead")
+            .map(([streamUrl, status]) => ({
+              streamUrl,
+              categoryId: checkTargetByUrl.get(streamUrl)?.category ?? cat,
+              status: status as "live" | "dead",
+              source: "check" as const,
+            }));
+          if (entries.length > 0) {
+            void upsertStreamHealthBatch(user.uid, entries);
+          }
+        },
+      });
+
+      if (!ac.signal.aborted) {
+        let live = 0;
+        let dead = 0;
+        for (const h of results.values()) {
+          if (h === "live") live++;
+          else if (h === "dead") dead++;
+        }
+        const finalStats: HealthCheckStats = {
+          done: results.size,
+          total: categoryCheckTargets.length,
+          live,
+          dead,
+        };
+        await writeCategoryHealthSummary(user.uid, cat, finalStats);
+        setHealthCheckedAt(Date.now());
+        setCheckStats(finalStats);
+        if (finalStats.live > 0) setHealthFilter("live");
+      }
+    } finally {
+      if (checkAbortRef.current === ac) {
+        checkAbortRef.current = null;
+        setCheckRunning(false);
+      }
+    }
+  }, [origin, user, categoryCheckTargets, checkRunning, cat, checkTargetByUrl]);
+
+  const stopHealthCheck = useCallback(() => {
+    checkAbortRef.current?.abort();
+    checkAbortRef.current = null;
+    setCheckRunning(false);
+  }, []);
+
+  const playbackHealthTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onPlaybackHealth = useCallback(
+    (status: "live" | "dead") => {
+      if (!user || !active) return;
+      setStreamHealth((prev) => {
+        const next = new Map(prev);
+        next.set(active.streamUrl, status);
+        return next;
+      });
+      if (playbackHealthTimer.current) clearTimeout(playbackHealthTimer.current);
+      playbackHealthTimer.current = setTimeout(() => {
+        void upsertStreamHealthFromPlayback(user.uid, active.streamUrl, active.category, status);
+      }, 600);
+    },
+    [user, active]
+  );
+
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
-  }, [cat, q, view, favOrder.length]);
+  }, [cat, q, view, favOrder.length, healthFilter]);
 
   useEffect(() => {
     if (isFavReorderMode) {
@@ -315,8 +486,8 @@ export function TVApp() {
     }
   }, [isFavReorderMode, filtered.length]);
 
-  const effectiveCap = isFavReorderMode ? filtered.length : visibleCount;
-  const visibleChannels = useMemo(() => filtered.slice(0, effectiveCap), [filtered, effectiveCap]);
+  const effectiveCap = isFavReorderMode ? healthFiltered.length : visibleCount;
+  const visibleChannels = useMemo(() => healthFiltered.slice(0, effectiveCap), [healthFiltered, effectiveCap]);
 
   const continueChannels = useMemo(() => {
     if (!data) return [];
@@ -367,6 +538,7 @@ export function TVApp() {
     setCat(dc);
     setQ("");
     setView("all");
+    setHealthFilter("all");
     const first = data.channels.find((ch) => ch.category === dc) ?? data.channels[0];
     if (first) setActive(first);
   }, [data]);
@@ -428,8 +600,12 @@ export function TVApp() {
     [data]
   );
 
+  const hasHealthResults = streamHealth.size > 0;
+  const healthFilterActive = healthFilter !== "all" && streamHealth.size > 0;
+
   const hasActiveFilters =
-    !!data && (cat !== defaultCatId || q.trim() !== "" || view !== "all");
+    !!data &&
+    (cat !== defaultCatId || q.trim() !== "" || view !== "all" || healthFilter !== "all");
 
   const profileFavoriteRows = useMemo(() => {
     if (!data) return [];
@@ -483,7 +659,7 @@ export function TVApp() {
   const siteHeader = (
     <header className="site-header">
       <div className="brand">
-          <img className="brand-mark" src="/brand-mark.svg" alt="" width={44} height={44} decoding="async" />
+          <img className="brand-mark" src="/brand-mark.svg" alt="SAYEM TV" width={44} height={44} decoding="async" />
         <div>
           <h1>SAYEM TV</h1>
           <p className="tagline">Live channels in your browser</p>
@@ -650,7 +826,12 @@ export function TVApp() {
 
       <section className="player-section">
         {active && proxiedSrc ? (
-          <VideoPlayer key={proxiedSrc} src={proxiedSrc} channelName={active.name} />
+          <VideoPlayer
+            key={proxiedSrc}
+            src={proxiedSrc}
+            channelName={active.name}
+            onPlaybackHealth={onPlaybackHealth}
+          />
         ) : (
           <div className="player-placeholder">Select a channel</div>
         )}
@@ -696,70 +877,32 @@ export function TVApp() {
         </section>
       ) : null}
 
-      <section className="filter-panel" aria-label="Channel filters">
-        <div className="filter-panel-top">
-          <input
-            type="search"
-            className="search search-toolbar search-full"
-            placeholder="Search channels and categories…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            aria-label="Search by channel name, category, or tag"
-          />
-        </div>
-
-        <div className="filter-panel-toolbar">
-          <div className="segmented" role="group" aria-label="Library scope">
-            <button
-              type="button"
-              className={view === "all" ? "seg active" : "seg"}
-              onClick={() => setView("all")}
-            >
-              All
-            </button>
-            <button
-              type="button"
-              className={view === "favorites" ? "seg active" : "seg"}
-              onClick={() => setView("favorites")}
-            >
-              Favorites
-              {favOrder.length > 0 ? <span className="seg-badge">{favOrder.length}</span> : null}
-            </button>
-          </div>
-
-          <div className="toolbar-end">
-            <span className="count-pill" title="Matching / total channels">
-              {filtered.length} / {data.channels.length}
-            </span>
-
-            {hasActiveFilters ? (
-              <button type="button" className="btn-ghost btn-toolbar-clear" onClick={clearFilters}>
-                Reset
-              </button>
-            ) : null}
-          </div>
-        </div>
-
-        <div className="filter-panel-category">
-          <label className="cat-picker-label" htmlFor="category-select">
-            Category
-          </label>
-          <select
-            id="category-select"
-            className="select select-cat"
-            value={cat}
-            onChange={(e) => setCat(e.target.value)}
-            aria-label="Filter by category"
-          >
-            <option value="all">All categories</option>
-            {data.categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {categoryLabel(c.id)}
-              </option>
-            ))}
-          </select>
-        </div>
-      </section>
+      <ChannelFilterPanel
+        q={q}
+        onSearchChange={setQ}
+        view={view}
+        onViewChange={setView}
+        favCount={favOrder.length}
+        cat={cat}
+        onCategoryChange={setCat}
+        categories={data.categories}
+        categoryLabel={categoryLabel}
+        filteredCount={filtered.length}
+        shownCount={healthFiltered.length}
+        totalCount={data.channels.length}
+        healthFilterActive={healthFilterActive}
+        hasActiveFilters={hasActiveFilters}
+        onResetFilters={clearFilters}
+        categoryCheckCount={categoryCheckTargets.length}
+        checkRunning={checkRunning}
+        checkStats={checkStats}
+        healthCheckedAt={healthCheckedAt}
+        hasHealthResults={hasHealthResults}
+        healthFilter={healthFilter}
+        onHealthFilterChange={setHealthFilter}
+        onStartHealthCheck={() => void startHealthCheck()}
+        onStopHealthCheck={stopHealthCheck}
+      />
 
       {view === "favorites" && favOrder.length > 1 && !isFavReorderMode ? (
         <p className="reorder-hint">
@@ -778,10 +921,11 @@ export function TVApp() {
       <div className="channel-grid">
         {visibleChannels.map((ch, idx) => {
           const isFav = favSet.has(ch.streamUrl);
+          const health = streamHealth.get(ch.streamUrl);
           return (
             <div
               key={ch.streamUrl}
-              className={`ch-cell ${isFavReorderMode ? "has-drag-handle" : ""} ${dragIdx === idx ? "is-dragging" : ""} ${dragOverIdx === idx ? "drag-over" : ""}`}
+              className={`ch-cell ${isFavReorderMode ? "has-drag-handle" : ""} ${dragIdx === idx ? "is-dragging" : ""} ${dragOverIdx === idx ? "drag-over" : ""} ${health === "dead" ? "ch-dead" : ""}`}
               onDragOver={(e) => onDragOverFav(e, idx)}
               onDrop={(e) => onDropFav(e, idx)}
             >
@@ -796,6 +940,14 @@ export function TVApp() {
                 >
                   <span aria-hidden>⋮⋮</span>
                 </div>
+              ) : null}
+              {health ? (
+                <span
+                  className={`ch-health ch-health-${health}`}
+                  title={health === "live" ? "Stream responded" : health === "dead" ? "Stream unreachable or error" : "Checking…"}
+                >
+                  {health === "checking" ? "…" : health === "live" ? "Live" : "Dead"}
+                </span>
               ) : null}
               <button
                 type="button"
@@ -843,12 +995,16 @@ export function TVApp() {
         })}
       </div>
 
-      {!isFavReorderMode && visibleCount < filtered.length ? (
+      {!isFavReorderMode && visibleCount < healthFiltered.length ? (
         <div className="load-more-wrap">
           <button type="button" className="btn-load-more" onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}>
-            Load more ({filtered.length - visibleCount} left)
+            Load more ({healthFiltered.length - visibleCount} left)
           </button>
         </div>
+      ) : null}
+
+      {healthFiltered.length === 0 && filtered.length > 0 ? (
+        <p className="empty">No {healthFilter} channels in this view. Try another filter or re-run the check.</p>
       ) : null}
 
       {filtered.length === 0 ? (

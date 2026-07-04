@@ -8,6 +8,8 @@ export const THEME_STORAGE_KEY = "sayem-tv-theme";
 export const LIBRARY_SYNC_KEY = "sayem-tv-library-sync";
 /** Deduped watch log for profile / cross-device sync (longer than continue strip). */
 export const WATCH_HISTORY_KEY = "sayem-tv-watch-history";
+/** Per-category live/dead results from the last stream health check (device only). */
+export const HEALTH_CHECK_CACHE_KEY = "sayem-tv-health-check";
 
 export const MAX_RECENT = 20;
 export const MAX_WATCH_HISTORY = 120;

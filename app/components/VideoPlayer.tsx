@@ -6,13 +6,26 @@ import Hls from "hls.js";
 type Props = {
   src: string;
   channelName: string;
+  onPlaybackHealth?: (status: "live" | "dead") => void;
 };
 
-export function VideoPlayer({ src, channelName }: Props) {
+export function VideoPlayer({ src, channelName, onPlaybackHealth }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [inPip, setInPip] = useState(false);
   const [pipSupported, setPipSupported] = useState(false);
+  const reportedRef = useRef<"live" | "dead" | null>(null);
+  const onPlaybackHealthRef = useRef(onPlaybackHealth);
+
+  useEffect(() => {
+    onPlaybackHealthRef.current = onPlaybackHealth;
+  }, [onPlaybackHealth]);
+
+  const reportHealth = useCallback((status: "live" | "dead") => {
+    if (reportedRef.current === status) return;
+    reportedRef.current = status;
+    onPlaybackHealthRef.current?.(status);
+  }, []);
 
   const destroy = useCallback(() => {
     if (hlsRef.current) {
@@ -22,10 +35,16 @@ export function VideoPlayer({ src, channelName }: Props) {
   }, []);
 
   useEffect(() => {
+    reportedRef.current = null;
+  }, [src]);
+
+  useEffect(() => {
     const video = videoRef.current;
     if (!video || !src) return;
 
     destroy();
+
+    const onPlaying = () => reportHealth("live");
 
     if (Hls.isSupported()) {
       const hls = new Hls({
@@ -39,6 +58,7 @@ export function VideoPlayer({ src, channelName }: Props) {
       hls.on(Hls.Events.MEDIA_ATTACHED, () => {
         hls.loadSource(src);
       });
+      hls.on(Hls.Events.MANIFEST_PARSED, () => reportHealth("live"));
       hls.on(Hls.Events.ERROR, (_e, data) => {
         if (data.fatal) {
           switch (data.type) {
@@ -49,6 +69,7 @@ export function VideoPlayer({ src, channelName }: Props) {
               hls.recoverMediaError();
               break;
             default:
+              reportHealth("dead");
               destroy();
               break;
           }
@@ -58,14 +79,20 @@ export function VideoPlayer({ src, channelName }: Props) {
       video.src = src;
     }
 
+    video.addEventListener("playing", onPlaying);
+    const onVideoError = () => reportHealth("dead");
+    video.addEventListener("error", onVideoError);
+
     return () => {
+      video.removeEventListener("playing", onPlaying);
+      video.removeEventListener("error", onVideoError);
       const v = videoRef.current;
       if (v && document.pictureInPictureElement === v) {
         document.exitPictureInPicture().catch(() => {});
       }
       destroy();
     };
-  }, [src, destroy]);
+  }, [src, destroy, reportHealth]);
 
   useEffect(() => {
     const v = videoRef.current;
