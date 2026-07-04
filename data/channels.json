@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-10T19:43:07.104Z",
+  "generatedAt": "2026-07-04T19:54:48.466Z",
   "categories": [
     {
       "id": "albania",
@@ -23,7 +23,7 @@
     },
     {
       "id": "bangladesh",
-      "title": "Bangladesh (17 CHANNEL)"
+      "title": "Bangladesh (42 CHANNEL)"
     },
     {
       "id": "belarus",
@@ -52,6 +52,10 @@
     {
       "id": "canada",
       "title": "Canada (5 CHANNEL)"
+    },
+    {
+      "id": "cartoon",
+      "title": "Cartoon (6 CHANNEL)"
     },
     {
       "id": "channels",
@@ -91,7 +95,7 @@
     },
     {
       "id": "documentary",
-      "title": "Documentary (5 CHANNEL)"
+      "title": "Documentary (12 CHANNEL)"
     },
     {
       "id": "dominican-republic",
@@ -111,7 +115,7 @@
     },
     {
       "id": "entertainment",
-      "title": "Entertainment (7 CHANNEL)"
+      "title": "Entertainment (20 CHANNEL)"
     },
     {
       "id": "estonia",
@@ -251,11 +255,11 @@
     },
     {
       "id": "movies",
-      "title": "Movies (18 CHANNEL)"
+      "title": "Movies (32 CHANNEL)"
     },
     {
       "id": "music",
-      "title": "Music (12 CHANNEL)"
+      "title": "Music (17 CHANNEL)"
     },
     {
       "id": "netherlands",
@@ -263,7 +267,7 @@
     },
     {
       "id": "news",
-      "title": "News (67 CHANNEL)"
+      "title": "News (68 CHANNEL)"
     },
     {
       "id": "news-ar",
@@ -330,6 +334,10 @@
       "title": "Serbia (4 CHANNEL)"
     },
     {
+      "id": "series",
+      "title": "Series (9 CHANNEL)"
+    },
+    {
       "id": "slovakia",
       "title": "Slovakia (9 CHANNEL)"
     },
@@ -343,7 +351,7 @@
     },
     {
       "id": "sports",
-      "title": "Sports (46 CHANNEL)"
+      "title": "Sports (110 CHANNEL)"
     },
     {
       "id": "sweden",
@@ -8776,6 +8784,1014 @@
       "streamUrl": "https://64b16f23efbee.streamlock.net/telecityvda/telecityvda/playlist.m3u8",
       "logoUrl": "https://i.imgur.com/T9EsAOX.jpeg",
       "logoAlt": "Telecity Valle D'Aosta"
+    },
+    {
+      "category": "sports",
+      "name": "Morocco vs Canada Match Toffee",
+      "streamUrl": "https://prod-cdn01-live.toffeelive.com/live/FIFA-2026/sst/0/master_1500.m3u8?hdntl=Expires=1783268582~_GO=Generated~URLPrefix=aHR0cHM6Ly9wcm9kLWNkbjAxLWxpdmUudG9mZmVlbGl2ZS5jb20~Signature=AeQsclDW3rqAy0c1aiNKedolP3uA_1QCbwGRLFNWpon9O1DL4K6ZKEBdfCM5bkkY3rxg-J1QjUvu3hJFMXgEsUMP10QB",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Morocco vs Canada Match Toffee"
+    },
+    {
+      "category": "sports",
+      "name": "BTV NS",
+      "streamUrl": "http://180.94.28.28:8097//BTV/index.fmp4.m3u8?token=8e9616c21d1ce3454bb9171c3c68550574f121aa-12a55987e1a817f2a4c12b2cfa6c3b78-1776169971-1776166371",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "BTV NS"
+    },
+    {
+      "category": "sports",
+      "name": "Somoy TV NS",
+      "streamUrl": "http://180.94.28.28:8097//Somoy-TV/index.fmp4.m3u8?token=4fde3d8957e50f434586227e0235025478768f0e-ed9e7afca3040a69f8179bfff33845e0-1776169971-1776166371",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Somoy TV NS"
+    },
+    {
+      "category": "sports",
+      "name": "TSN 1 WC",
+      "streamUrl": "http://fastshare1.com/live/1Aoen7elp5/IgMJ60tmAa/748388.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "TSN 1 WC"
+    },
+    {
+      "category": "sports",
+      "name": "TSN 1 WC B",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/748388.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "TSN 1 WC B"
+    },
+    {
+      "category": "sports",
+      "name": "Unite Sports A",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/741567.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Unite Sports A"
+    },
+    {
+      "category": "sports",
+      "name": "Unite Sports B",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/745202.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Unite Sports B"
+    },
+    {
+      "category": "sports",
+      "name": "Fox 1",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/751354.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Fox 1"
+    },
+    {
+      "category": "sports",
+      "name": "Fox 2",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/751355.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Fox 2"
+    },
+    {
+      "category": "sports",
+      "name": "Bein Sports 1 HD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/744517.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Bein Sports 1 HD"
+    },
+    {
+      "category": "sports",
+      "name": "Bein Sports 2 HD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/744518.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Bein Sports 2 HD"
+    },
+    {
+      "category": "sports",
+      "name": "Bein Sports 3 HD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/744519.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Bein Sports 3 HD"
+    },
+    {
+      "category": "sports",
+      "name": "Bein Sports 4 HD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/744520.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Bein Sports 4 HD"
+    },
+    {
+      "category": "sports",
+      "name": "Bein Sports 5 HD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/744521.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Bein Sports 5 HD"
+    },
+    {
+      "category": "sports",
+      "name": "Bein Sports 6 HD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/744522.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Bein Sports 6 HD"
+    },
+    {
+      "category": "sports",
+      "name": "Bein Sports 1 FHD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/744523.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Bein Sports 1 FHD"
+    },
+    {
+      "category": "sports",
+      "name": "Bein Sports 2 FHD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/744524.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Bein Sports 2 FHD"
+    },
+    {
+      "category": "sports",
+      "name": "Bein Sports 3 FHD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/744525.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Bein Sports 3 FHD"
+    },
+    {
+      "category": "sports",
+      "name": "Bein Sports 4 FHD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/744526.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Bein Sports 4 FHD"
+    },
+    {
+      "category": "sports",
+      "name": "Bein Sports 5 FHD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/744527.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Bein Sports 5 FHD"
+    },
+    {
+      "category": "sports",
+      "name": "Bein Sports 6 FHD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/744528.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Bein Sports 6 FHD"
+    },
+    {
+      "category": "sports",
+      "name": "Test 1",
+      "streamUrl": "http://103.72.65.229:8422/tv.cricflixs.com/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Test 1"
+    },
+    {
+      "category": "sports",
+      "name": "Bein Sports",
+      "streamUrl": "https://1nyaler.streamhostingcdn.top/stream/23/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Bein Sports"
+    },
+    {
+      "category": "sports",
+      "name": "TVP Sports",
+      "streamUrl": "https://1nyaler.streamhostingcdn.top/stream/89/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "TVP Sports"
+    },
+    {
+      "category": "sports",
+      "name": "616 Sports 4K",
+      "streamUrl": "http://starhub.pro/live/farhat-3379/67897-913379/745270.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "616 Sports 4K"
+    },
+    {
+      "category": "sports",
+      "name": "616 Sports 4K B",
+      "streamUrl": "http://fastshare1.com/live/1Aoen7elp5/IgMJ60tmAa/745270.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "616 Sports 4K B"
+    },
+    {
+      "category": "sports",
+      "name": "World Cup A1",
+      "streamUrl": "http://rgkkw.live:80/live/1Aoen7elp5/IgMJ60tmAa/130714.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "World Cup A1"
+    },
+    {
+      "category": "sports",
+      "name": "World Cup A2",
+      "streamUrl": "http://198.195.239.50:8095/tsports/tracks-v1a1/mono.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "World Cup A2"
+    },
+    {
+      "category": "sports",
+      "name": "World Cup A3",
+      "streamUrl": "http://198.195.239.50:8095/ptv/tracks-v1a1/mono.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "World Cup A3"
+    },
+    {
+      "category": "sports",
+      "name": "T Sports",
+      "streamUrl": "http://114.130.57.233:8080/TsportHD/tracks-v1a1/mono.m3u8?token=SkQuhAXZxgBan1",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "T Sports"
+    },
+    {
+      "category": "sports",
+      "name": "BTV Live",
+      "streamUrl": "http://103.14.151.101:11/manik-kuttar-baccha-telegram-batpar.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "BTV Live"
+    },
+    {
+      "category": "sports",
+      "name": "BTV B",
+      "streamUrl": "http://114.130.57.233:8080/manik-kutta-moharaza-kuttar-baccha-t.me/tvserverhd/video.m3u8?token=manik-kuttar-baccha-t.me/tvserverhd",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "BTV B"
+    },
+    {
+      "category": "sports",
+      "name": "Somoy TV",
+      "streamUrl": "http://114.130.57.233:8080/Somoy-TV-3Mb/tracks-v1a1/mono.m3u8?token=SkQuhAXZxgBan1",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Somoy TV"
+    },
+    {
+      "category": "sports",
+      "name": "Somoy TV A",
+      "streamUrl": "http://198.195.239.50:8095/somoyTv/tracks-v1a1/mono.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Somoy TV A"
+    },
+    {
+      "category": "sports",
+      "name": "Somoy TV B",
+      "streamUrl": "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Somoy TV B"
+    },
+    {
+      "category": "sports",
+      "name": "Somoy TV C",
+      "streamUrl": "https://iptv.ryvoxtb.workers.dev/live/somoytv.m3u8?token=698bb62d6919e5c22ec8be7a017971f5&time=1781488364",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Somoy TV C"
+    },
+    {
+      "category": "sports",
+      "name": "Somoy TV D",
+      "streamUrl": "https://tv.beyondtaxconsultants.com/api/robi/lps/http://116.204.149.16/somoytv/tracks-v1a1/mono.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Somoy TV D"
+    },
+    {
+      "category": "sports",
+      "name": "Mahsun Sports",
+      "streamUrl": "https://andro.226503.xyz/checklist/androstreamlivebs1.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Mahsun Sports"
+    },
+    {
+      "category": "sports",
+      "name": "Unite 8 Sports 1 HD Hindi",
+      "streamUrl": "http://starhub.pro/live/farhat-3379/67897-913379/741567.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Unite 8 Sports 1 HD Hindi"
+    },
+    {
+      "category": "sports",
+      "name": "Unite 8 Sports 1 HD B",
+      "streamUrl": "http://fastshare1.com/live/1Aoen7elp5/IgMJ60tmAa/741567.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Unite 8 Sports 1 HD B"
+    },
+    {
+      "category": "sports",
+      "name": "Unite 8 Sports 2 HD",
+      "streamUrl": "http://202.70.146.135:8000/play/a06s/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Unite 8 Sports 2 HD"
+    },
+    {
+      "category": "sports",
+      "name": "Unite 8 Sports 2",
+      "streamUrl": "http://fastshare1.com/live/1Aoen7elp5/IgMJ60tmAa/745202.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Unite 8 Sports 2"
+    },
+    {
+      "category": "sports",
+      "name": "S Live Central A",
+      "streamUrl": "http://rgkkw.live/live/1Aoen7elp5/IgMJ60tmAa/745149.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "S Live Central A"
+    },
+    {
+      "category": "sports",
+      "name": "S Live Central B",
+      "streamUrl": "http://fastshare1.com/live/1Aoen7elp5/IgMJ60tmAa/745149.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "S Live Central B"
+    },
+    {
+      "category": "sports",
+      "name": "S Live Pass",
+      "streamUrl": "http://fastshare1.com/live/1Aoen7elp5/IgMJ60tmAa/745195.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "S Live Pass"
+    },
+    {
+      "category": "sports",
+      "name": "S Live Extra",
+      "streamUrl": "http://fastshare1.com/live/1Aoen7elp5/IgMJ60tmAa/745211.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "S Live Extra"
+    },
+    {
+      "category": "sports",
+      "name": "Fox Sports - FIFA",
+      "streamUrl": "http://84.17.50.102/fox/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Fox Sports - FIFA"
+    },
+    {
+      "category": "sports",
+      "name": "Fox Sports 1 - FIFA",
+      "streamUrl": "http://41.223.30.230/FOXSPORTS1/tracks-v1a1/mono.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Fox Sports 1 - FIFA"
+    },
+    {
+      "category": "sports",
+      "name": "Fox Sports 1 B - FIFA",
+      "streamUrl": "http://fastshare1.com/live/1Aoen7elp5/IgMJ60tmAa/130044.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Fox Sports 1 B - FIFA"
+    },
+    {
+      "category": "sports",
+      "name": "Fox Sports 1 C - FIFA",
+      "streamUrl": "http://fastshare1.com/live/1Aoen7elp5/IgMJ60tmAa/3420.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Fox Sports 1 C - FIFA"
+    },
+    {
+      "category": "sports",
+      "name": "PTV Sports A",
+      "streamUrl": "https://crichd.johirxofficial.workers.dev/live/ptvpk.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "PTV Sports A"
+    },
+    {
+      "category": "sports",
+      "name": "PTV Sports B",
+      "streamUrl": "http://stalker.hakunamata.workers.dev/play/1099/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "PTV Sports B"
+    },
+    {
+      "category": "sports",
+      "name": "PTV Sports C",
+      "streamUrl": "http://premiumtvs.space/live/jen12345/Jen54321/89.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "PTV Sports C"
+    },
+    {
+      "category": "sports",
+      "name": "M6 Spports",
+      "streamUrl": "https://tv.beyondtaxconsultants.com/api/robi/lps/http://151.80.18.177:86/M6_HD/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "M6 Spports"
+    },
+    {
+      "category": "sports",
+      "name": "D Sports",
+      "streamUrl": "http://190.108.83.69:8000/play/a05w/72644547.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "D Sports"
+    },
+    {
+      "category": "sports",
+      "name": "Win Sports",
+      "streamUrl": "https://1nyaler.streamhostingcdn.top/stream/32/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Win Sports"
+    },
+    {
+      "category": "sports",
+      "name": "Dazn Direct",
+      "streamUrl": "https://1nyaler.streamhostingcdn.top/stream/94/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Dazn Direct"
+    },
+    {
+      "category": "sports",
+      "name": "D Sports",
+      "streamUrl": "https://1nyaler.streamhostingcdn.top/stream/106/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "D Sports"
+    },
+    {
+      "category": "sports",
+      "name": "TYC Sports",
+      "streamUrl": "https://1nyaler.streamhostingcdn.top/stream/84/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "TYC Sports"
+    },
+    {
+      "category": "sports",
+      "name": "Tv Azteca",
+      "streamUrl": "https://1nyaler.streamhostingcdn.top/stream/117/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Tv Azteca"
+    },
+    {
+      "category": "sports",
+      "name": "Tudn Sports",
+      "streamUrl": "https://1nyaler.streamhostingcdn.top/stream/52/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Tudn Sports"
+    },
+    {
+      "category": "sports",
+      "name": "Tudn Sports B",
+      "streamUrl": "http://str2.v3v3v.xyz:2082/live/rokhsi25_951396/POm6KqnW/276843.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Tudn Sports B"
+    },
+    {
+      "category": "sports",
+      "name": "Canal 5",
+      "streamUrl": "http://str2.v3v3v.xyz:2082/live/rokhsi25_951396/POm6KqnW/276767.ts",
+      "logoUrl": "https://imglink.cc/cdn/RY7jBwPKAr.jpg",
+      "logoAlt": "Canal 5"
+    },
+    {
+      "category": "entertainment",
+      "name": "Star Jalsha",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/198.ts",
+      "logoUrl": "https://imglink.cc/cdn/3TXPVSGzx5.png",
+      "logoAlt": "Star Jalsha"
+    },
+    {
+      "category": "entertainment",
+      "name": "Star Jalsha B",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/23218.ts",
+      "logoUrl": "https://imglink.cc/cdn/3TXPVSGzx5.png",
+      "logoAlt": "Star Jalsha B"
+    },
+    {
+      "category": "entertainment",
+      "name": "Star Jalsha C",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/98883.ts",
+      "logoUrl": "https://imglink.cc/cdn/3TXPVSGzx5.png",
+      "logoAlt": "Star Jalsha C"
+    },
+    {
+      "category": "entertainment",
+      "name": "Zee Bangla",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/23305.ts",
+      "logoUrl": "https://imglink.cc/cdn/qonZADSZua.png",
+      "logoAlt": "Zee Bangla"
+    },
+    {
+      "category": "entertainment",
+      "name": "Zee Bangla B",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/98881.ts",
+      "logoUrl": "https://imglink.cc/cdn/qonZADSZua.png",
+      "logoAlt": "Zee Bangla B"
+    },
+    {
+      "category": "entertainment",
+      "name": "Colors Bangla",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/183.ts",
+      "logoUrl": "https://imglink.cc/cdn/oDQ4LN8zlN.png",
+      "logoAlt": "Colors Bangla"
+    },
+    {
+      "category": "entertainment",
+      "name": "Colors Bangla B",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/23306.ts",
+      "logoUrl": "https://imglink.cc/cdn/oDQ4LN8zlN.png",
+      "logoAlt": "Colors Bangla B"
+    },
+    {
+      "category": "entertainment",
+      "name": "Colors Bangla C",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/98882.ts",
+      "logoUrl": "https://imglink.cc/cdn/oDQ4LN8zlN.png",
+      "logoAlt": "Colors Bangla C"
+    },
+    {
+      "category": "entertainment",
+      "name": "Sun Bangla",
+      "streamUrl": "http://fastshare1.com/live/1Aoen7elp5/IgMJ60tmAa/3753.ts",
+      "logoUrl": "https://imglink.cc/cdn/vyWRYIqnfy.png",
+      "logoAlt": "Sun Bangla"
+    },
+    {
+      "category": "entertainment",
+      "name": "Sun Bangla B",
+      "streamUrl": "http://180.94.28.28:8097//SUN-BANGLA/index.fmp4.m3u8?token=ddf83cdff5d2a3215579fa2d1303886e18ab6d5c-749917c00731c4d6f44b52a2cfc14557-1776169972-1776166372",
+      "logoUrl": "https://imglink.cc/cdn/vyWRYIqnfy.png",
+      "logoAlt": "Sun Bangla B"
+    },
+    {
+      "category": "entertainment",
+      "name": "Enter10 Bangla",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/3801.ts",
+      "logoUrl": "",
+      "logoAlt": "Enter10 Bangla"
+    },
+    {
+      "category": "entertainment",
+      "name": "Sony Aath",
+      "streamUrl": "http://fastshare1.com/live/1Aoen7elp5/IgMJ60tmAa/4083.ts",
+      "logoUrl": "https://imglink.cc/cdn/5tDvvUEpWx.png",
+      "logoAlt": "Sony Aath"
+    },
+    {
+      "category": "entertainment",
+      "name": "Sony Aath B",
+      "streamUrl": "https://sm-monirul.top/toffee/play/sonyaath.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/5tDvvUEpWx.png",
+      "logoAlt": "Sony Aath B"
+    },
+    {
+      "category": "movies",
+      "name": "HBO 2",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/185.ts",
+      "logoUrl": "https://imglink.cc/cdn/cScI5tEUjV.png",
+      "logoAlt": "HBO 2"
+    },
+    {
+      "category": "movies",
+      "name": "Star Movies HD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/979.ts",
+      "logoUrl": "https://imglink.cc/cdn/cScI5tEUjV.png",
+      "logoAlt": "Star Movies HD"
+    },
+    {
+      "category": "movies",
+      "name": "Star Movies FHD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/9384.ts",
+      "logoUrl": "https://imglink.cc/cdn/cScI5tEUjV.png",
+      "logoAlt": "Star Movies FHD"
+    },
+    {
+      "category": "movies",
+      "name": "Star Movies 4K",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/98842.ts",
+      "logoUrl": "https://imglink.cc/cdn/cScI5tEUjV.png",
+      "logoAlt": "Star Movies 4K"
+    },
+    {
+      "category": "movies",
+      "name": "Star Movies Select HD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/218.ts",
+      "logoUrl": "https://imglink.cc/cdn/cScI5tEUjV.png",
+      "logoAlt": "Star Movies Select HD"
+    },
+    {
+      "category": "movies",
+      "name": "Star Movies Select FHD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/23270.ts",
+      "logoUrl": "https://imglink.cc/cdn/cScI5tEUjV.png",
+      "logoAlt": "Star Movies Select FHD"
+    },
+    {
+      "category": "movies",
+      "name": "Star Movies Select 4K",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/98843.ts",
+      "logoUrl": "https://imglink.cc/cdn/cScI5tEUjV.png",
+      "logoAlt": "Star Movies Select 4K"
+    },
+    {
+      "category": "movies",
+      "name": "Sony Pix",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/9381.ts",
+      "logoUrl": "https://imglink.cc/cdn/cScI5tEUjV.png",
+      "logoAlt": "Sony Pix"
+    },
+    {
+      "category": "movies",
+      "name": "Movies Now",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/152387.ts",
+      "logoUrl": "https://imglink.cc/cdn/cScI5tEUjV.png",
+      "logoAlt": "Movies Now"
+    },
+    {
+      "category": "movies",
+      "name": "Jalsha Movies",
+      "streamUrl": "http://180.94.28.28:8097//JALSHA-MOVIES/index.fmp4.m3u8?token=db2538fdd0d868b1f01d342ee7929f62a5083d97-7601b35e404354f1cb113317091539cf-1776169971-1776166371",
+      "logoUrl": "https://imglink.cc/cdn/hEzUhoTW3x.jpg",
+      "logoAlt": "Jalsha Movies"
+    },
+    {
+      "category": "movies",
+      "name": "South India Movie",
+      "streamUrl": "https://live20.bozztv.com/giatvplayout7/giatv-209593/tracks-v1a1/mono.ts.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/cScI5tEUjV.png",
+      "logoAlt": "South India Movie"
+    },
+    {
+      "category": "movies",
+      "name": "Song Max",
+      "streamUrl": "http://180.94.28.28:8097//SONY-MAX/index.fmp4.m3u8?token=3cb50ef3d94ad1661590b7d21df6f5f56856da25-0e28ff981157c82e879c35fbff082361-1776169972-1776166372",
+      "logoUrl": "https://imglink.cc/cdn/4mRBs1A-x_.png",
+      "logoAlt": "Song Max"
+    },
+    {
+      "category": "movies",
+      "name": "Sony Max HD",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/9373.ts",
+      "logoUrl": "https://imglink.cc/cdn/4mRBs1A-x_.png",
+      "logoAlt": "Sony Max HD"
+    },
+    {
+      "category": "movies",
+      "name": "Star Gold",
+      "streamUrl": "http://fastshare1.com/live/25711345/late8airline/9375.ts",
+      "logoUrl": "https://imglink.cc/cdn/Nkj7hqlPz-.jpg",
+      "logoAlt": "Star Gold"
+    },
+    {
+      "category": "music",
+      "name": "9X Tashan",
+      "streamUrl": "https://wiselp.wiseplayout.com/9X_Tashan/master.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/IYDn_LwwiV.png",
+      "logoAlt": "9X Tashan"
+    },
+    {
+      "category": "music",
+      "name": "9X Jalwa",
+      "streamUrl": "https://wiselp.wiseplayout.com/9X_Jalwa/master.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/IYDn_LwwiV.png",
+      "logoAlt": "9X Jalwa"
+    },
+    {
+      "category": "music",
+      "name": "9X Jhakaas",
+      "streamUrl": "https://wiselp.wiseplayout.com/9X_Jhakaas/master.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/IYDn_LwwiV.png",
+      "logoAlt": "9X Jhakaas"
+    },
+    {
+      "category": "music",
+      "name": "Bengali Beat",
+      "streamUrl": "https://tplay.live/originals/bengali-beats/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/IYDn_LwwiV.png",
+      "logoAlt": "Bengali Beat"
+    },
+    {
+      "category": "music",
+      "name": "Party Universe",
+      "streamUrl": "https://nomawnoijl.gpcdn.net/akash/partyuniverse/chunks.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/IYDn_LwwiV.png",
+      "logoAlt": "Party Universe"
+    },
+    {
+      "category": "cartoon",
+      "name": "Tom & Jerry TV",
+      "streamUrl": "https://live20.bozztv.com/giatvplayout7/giatv-208314/tracks-v1a1/mono.ts.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/YkXRQgC4-_.jpg",
+      "logoAlt": "Tom & Jerry TV"
+    },
+    {
+      "category": "cartoon",
+      "name": "Nick Bangla",
+      "streamUrl": "http://103.204.43.87:8080/live/1/1/275.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/XRDlkFnTFb.jpg",
+      "logoAlt": "Nick Bangla"
+    },
+    {
+      "category": "cartoon",
+      "name": "Sonic Bangla",
+      "streamUrl": "http://103.204.43.87:8080/live/1/1/274.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/G2BnUli8dP.png",
+      "logoAlt": "Sonic Bangla"
+    },
+    {
+      "category": "cartoon",
+      "name": "Doraemon TV",
+      "streamUrl": "https://live20.bozztv.com/giatvplayout7/giatv-209902/tracks-v1a1/mono.ts.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/rmNeL8f6NR.png",
+      "logoAlt": "Doraemon TV"
+    },
+    {
+      "category": "cartoon",
+      "name": "Mr Bean Animated",
+      "streamUrl": "https://amg00627-amg00627c29-rakuten-it-3989.playouts.now.amagi.tv/playlist/amg00627-banijayfast-mrbeanitcc-rakutenit/playlist.m3u8",
+      "logoUrl": "https://i.ibb.co.com/XfqV4B56/png-transparent-mr-bean-illustration-youtube-coloring-book-character-cartoon-mr-bean-television-chil.png",
+      "logoAlt": "Mr Bean Animated"
+    },
+    {
+      "category": "cartoon",
+      "name": "Cartoon Network",
+      "streamUrl": "https://tvsen5.aynaott.com/cartoonnetwork/tracks-v1a1/mono.ts.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/48br-Lpr61.png",
+      "logoAlt": "Cartoon Network"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Asian TV",
+      "streamUrl": "https://mtlivestream.com/hls/asian/ytlive/index.m3u8",
+      "logoUrl": "https://i.ibb.co.com/mCwss66N/Asian-TV.png",
+      "logoAlt": "Asian TV"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Ayna TV",
+      "streamUrl": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/ayna.stream/tracks-v1a1/mono.m3u8",
+      "logoUrl": "https://i.ibb.co.com/5hy7S3wB/Ayna-TV.png",
+      "logoAlt": "Ayna TV"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Bangla Vision",
+      "streamUrl": "https://owrcovcrpy.gpcdn.net/bpk-tv/1715/output/1715-audio_113452_eng=113200-video=1181200.m3u8",
+      "logoUrl": "https://i.ibb.co.com/5X1JmFbF/Bangla-Vision.png",
+      "logoAlt": "Bangla Vision"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Bijoy TV",
+      "streamUrl": "https://tvsen6.aynaott.com/bijoytv/index.m3u8?e=1780662760&u=78be6644-0a65-48ec-81a4-089ac65a2619&token=3ce64c165e70832dc446d5fe776bb64b",
+      "logoUrl": "https://i.ibb.co.com/DP1GSwB3/Bijoy-TV.png",
+      "logoAlt": "Bijoy TV"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Boishakhi TV",
+      "streamUrl": "http://fastshare1.com/live/1Aoen7elp5/IgMJ60tmAa/390.ts",
+      "logoUrl": "https://i.ibb.co.com/sptqqqj9/Boishakhi-TV.png",
+      "logoAlt": "Boishakhi TV"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Bangla Tv",
+      "streamUrl": "http://fastshare1.com/live/1Aoen7elp5/IgMJ60tmAa/3803.ts",
+      "logoUrl": "https://imglink.cc/cdn/YQ8D9Wf0IT.png",
+      "logoAlt": "Bangla Tv"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Boishakhi TV B",
+      "streamUrl": "https://boishakhi.sonarbanglatv.com/boishakhi/boishakhitv/index.m3u8",
+      "logoUrl": "https://i.ibb.co.com/sptqqqj9/Boishakhi-TV.png",
+      "logoAlt": "Boishakhi TV B"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Channel I B",
+      "streamUrl": "http://180.94.28.28:8097//CHANNEL-i/index.fmp4.m3u8?token=edd3c5a4856fce1c8debb946340b0c1b7136c671-53d53c09b3f212c40bad1c86d5e2f087-1776169971-1776166371",
+      "logoUrl": "https://imglink.cc/cdn/H038J5LwdN.png",
+      "logoAlt": "Channel I B"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Channel 1 TV",
+      "streamUrl": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/channel1bd.stream/tracks-v1a1/mono.m3u8",
+      "logoUrl": "https://i.ibb.co.com/N6HbH5rH/Channel-One-TV.png",
+      "logoAlt": "Channel 1 TV"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Channel 24",
+      "streamUrl": "https://owrcovcrpy.gpcdn.net/bpk-tv/1703/output/1703-audio_113332_eng=113200-video=2202800.m3u8",
+      "logoUrl": "https://i.ibb.co.com/v65cfQ96/Channel-24.png",
+      "logoAlt": "Channel 24"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Channel 9 HD",
+      "streamUrl": "https://owrcovcrpy.gpcdn.net/bpk-tv/1729/output/1729-audio_113592_eng=113200-video=1181200.m3u8",
+      "logoUrl": "https://i.ibb.co.com/Xxrdnxkp/Channel9-HD.png",
+      "logoAlt": "Channel 9 HD"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Channel S TV",
+      "streamUrl": "https://app.ncare.live/live-orgin/channels.stream/live-orgin/channels.stream/chunks.m3u8",
+      "logoUrl": "https://i.ibb.co.com/Vp2HKT0s/Channel-S-TV.png",
+      "logoAlt": "Channel S TV"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Deepto TV",
+      "streamUrl": "https://byphdgllyk.gpcdn.net/hls/deeptotv/0_1/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/2ODX-FAGY4.png",
+      "logoAlt": "Deepto TV"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Desh TV",
+      "streamUrl": "https://bozztv.com/rongo/rongo-DeshTV/index.m3u8",
+      "logoUrl": "https://i.ibb.co.com/fVH9h8Tk/Desh-TV.png",
+      "logoAlt": "Desh TV"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Ekhon TV",
+      "streamUrl": "https://tvsen6.aynaott.com/ekhontv/tracks-v1a1/mono.ts.m3u8",
+      "logoUrl": "https://i.ibb.co.com/YrDVpDt/Ekhon-Tv.png",
+      "logoAlt": "Ekhon TV"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Ekattor TV HD",
+      "streamUrl": "https://owrcovcrpy.gpcdn.net/bpk-tv/1705/output/1705.m3u8",
+      "logoUrl": "https://i.ibb.co.com/DPZrfqzr/Ekattor-TV-HD.png",
+      "logoAlt": "Ekattor TV HD"
+    },
+    {
+      "category": "bangladesh",
+      "name": "GTV",
+      "streamUrl": "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDEEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFseWRtaW51aiPhnPTI2/gazibdz.stream/tracks-v1a1/mono.m3u8",
+      "logoUrl": "https://i.ibb.co.com/cc5rftrN/Gazi-TV.png",
+      "logoAlt": "GTV"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Jago News 24",
+      "streamUrl": "https://app.ncare.live/live-orgin/jagonews24.stream/live-orgin/jagonews24.stream/chunks.m3u8",
+      "logoUrl": "https://i.ibb.co.com/KpRt3cT5/Jago-News-24.png",
+      "logoAlt": "Jago News 24"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Maasranga TV",
+      "streamUrl": "https://owrcovcrpy.gpcdn.net/bpk-tv/1722/output/1722.m3u8",
+      "logoUrl": "https://i.ibb.co.com/S7c6STRZ/Maasranga-TV.png",
+      "logoAlt": "Maasranga TV"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Movie Bangla",
+      "streamUrl": "http://alvetv.com/moviebanglatv/8080/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/B1Dn0E5UKs.png",
+      "logoAlt": "Movie Bangla"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Nexus TV",
+      "streamUrl": "http://fastshare1.com/live/1Aoen7elp5/IgMJ60tmAa/411.ts",
+      "logoUrl": "https://i.ibb.co.com/d0hw38JN/Nexus-TV.png",
+      "logoAlt": "Nexus TV"
+    },
+    {
+      "category": "bangladesh",
+      "name": "NTV",
+      "streamUrl": "https://owrcovcrpy.gpcdn.net/bpk-tv/1716/output/1716-audio_113462_eng=113200-video=1181200.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/D8KxMc9soN.png",
+      "logoAlt": "NTV"
+    },
+    {
+      "category": "sports",
+      "name": "Nagorik Tv",
+      "streamUrl": "http://180.94.28.28:8097//Nagorik-TV/index.fmp4.m3u8?token=544f08111346de6231cb27cc5df8d732ef8cfd3a-09a292e51717f3456b187cfccec43169-1776169971-1776166371",
+      "logoUrl": "",
+      "logoAlt": "Nagorik Tv"
+    },
+    {
+      "category": "bangladesh",
+      "name": "RTV Live",
+      "streamUrl": "https://tvsen6.aynaott.com/rtv/tracks-v1a1/mono.ts.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/JZnibxXLfK.png",
+      "logoAlt": "RTV Live"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Star News",
+      "streamUrl": "https://owrcovcrpy.gpcdn.net/bpk-tv/1710/output/1710-audio_113402_eng=113200-video=1181200.m3u8",
+      "logoUrl": "https://i.ibb.co.com/cXTjmmtP/Star-News.png",
+      "logoAlt": "Star News"
+    },
+    {
+      "category": "bangladesh",
+      "name": "Thikana",
+      "streamUrl": "https://5dd3981940faa.streamlock.net:443/thikanatv/thikanatv/playlist.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/rw8iAU9ZcB.jpg",
+      "logoAlt": "Thikana"
+    },
+    {
+      "category": "news",
+      "name": "Republic Bangla",
+      "streamUrl": "https://vg-republictvlive.akamaized.net/v1/manifest/611d79b11b77e2f571934fd80ca1413453772ac7/vglive-sk-456368/06e5afc2-a022-4e51-9131-4e33a6207c5c/1.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/ndYg8AR85Y.jpg",
+      "logoAlt": "Republic Bangla"
+    },
+    {
+      "category": "documentary",
+      "name": "Discovery Bangla NS",
+      "streamUrl": "http://180.94.28.28:8097//DISCOVERY-BANGLA/index.fmp4.m3u8?token=2c8ee71be8bca324c7695c06255bb0df4ef4efc8-161b0b59279082dc59bee57ac116fd64-1776169973-1776166373",
+      "logoUrl": "https://imglink.cc/cdn/mv5xd7yy0d.png",
+      "logoAlt": "Discovery Bangla NS"
+    },
+    {
+      "category": "documentary",
+      "name": "Discovery Bangla",
+      "streamUrl": "http://103.180.212.191:3500/live/573.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/mv5xd7yy0d.png",
+      "logoAlt": "Discovery Bangla"
+    },
+    {
+      "category": "documentary",
+      "name": "Discovery Hindi",
+      "streamUrl": "http://103.180.212.191:3500/live/3428.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/mv5xd7yy0d.png",
+      "logoAlt": "Discovery Hindi"
+    },
+    {
+      "category": "documentary",
+      "name": "Discovery Hindi B",
+      "streamUrl": "https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Discoverychannel2/default/manifest.mpd",
+      "logoUrl": "https://imglink.cc/cdn/mv5xd7yy0d.png",
+      "logoAlt": "Discovery Hindi B"
+    },
+    {
+      "category": "documentary",
+      "name": "Geography HD NS",
+      "streamUrl": "http://180.94.28.28:8097//NAT-GEO-BANGLA/index.fmp4.m3u8?token=b65b1f2861f21a6ab3b4916d72ad33c40559f5f2-93bd82f1e08068f6a05007af78dc76bb-1776169973-1776166373",
+      "logoUrl": "https://imglink.cc/cdn/eEZmseF3Tb.jpg",
+      "logoAlt": "Geography HD NS"
+    },
+    {
+      "category": "documentary",
+      "name": "Geography HD",
+      "streamUrl": "http://202.70.146.135:8000/play/a05o/index.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/eEZmseF3Tb.jpg",
+      "logoAlt": "Geography HD"
+    },
+    {
+      "category": "documentary",
+      "name": "Animal Planet",
+      "streamUrl": "https://tiger-hub.vercel.app@vodzong.mjunoon.tv:8087/streamtest/Animal-Planet-158-3/playlist.m3u8",
+      "logoUrl": "https://imglink.cc/cdn/ebC033LNf2.png",
+      "logoAlt": "Animal Planet"
+    },
+    {
+      "category": "series",
+      "name": "Stranger Thing S4 E1",
+      "streamUrl": "http://fastshare1.com/series/25711345/late8airline/634701.mp4",
+      "logoUrl": "https://imglink.cc/cdn/-n_ZO1Y3ib.jpg",
+      "logoAlt": "Stranger Thing S4 E1"
+    },
+    {
+      "category": "series",
+      "name": "Stranger Thing S4 E2",
+      "streamUrl": "http://fastshare1.com/series/25711345/late8airline/634702.mp4",
+      "logoUrl": "https://imglink.cc/cdn/-n_ZO1Y3ib.jpg",
+      "logoAlt": "Stranger Thing S4 E2"
+    },
+    {
+      "category": "series",
+      "name": "Stranger Thing S4 E3",
+      "streamUrl": "http://fastshare1.com/series/25711345/late8airline/634703.mp4",
+      "logoUrl": "https://imglink.cc/cdn/-n_ZO1Y3ib.jpg",
+      "logoAlt": "Stranger Thing S4 E3"
+    },
+    {
+      "category": "series",
+      "name": "Stranger Thing S4 E4",
+      "streamUrl": "http://fastshare1.com/series/25711345/late8airline/634704.mp4",
+      "logoUrl": "https://imglink.cc/cdn/-n_ZO1Y3ib.jpg",
+      "logoAlt": "Stranger Thing S4 E4"
+    },
+    {
+      "category": "series",
+      "name": "Stranger Thing S4 E5",
+      "streamUrl": "http://fastshare1.com/series/25711345/late8airline/634705.mp4",
+      "logoUrl": "https://imglink.cc/cdn/-n_ZO1Y3ib.jpg",
+      "logoAlt": "Stranger Thing S4 E5"
+    },
+    {
+      "category": "series",
+      "name": "Stranger Thing S4 E6",
+      "streamUrl": "http://fastshare1.com/series/25711345/late8airline/634706.mp4",
+      "logoUrl": "https://imglink.cc/cdn/-n_ZO1Y3ib.jpg",
+      "logoAlt": "Stranger Thing S4 E6"
+    },
+    {
+      "category": "series",
+      "name": "Stranger Thing S4 E7",
+      "streamUrl": "http://fastshare1.com/series/25711345/late8airline/634707.mp4",
+      "logoUrl": "https://imglink.cc/cdn/-n_ZO1Y3ib.jpg",
+      "logoAlt": "Stranger Thing S4 E7"
+    },
+    {
+      "category": "series",
+      "name": "Stranger Thing S4 E8",
+      "streamUrl": "http://fastshare1.com/series/25711345/late8airline/634708.mp4",
+      "logoUrl": "https://imglink.cc/cdn/-n_ZO1Y3ib.jpg",
+      "logoAlt": "Stranger Thing S4 E8"
+    },
+    {
+      "category": "series",
+      "name": "Stranger Thing S4 E9",
+      "streamUrl": "http://fastshare1.com/series/25711345/late8airline/634709.mp4",
+      "logoUrl": "https://imglink.cc/cdn/-n_ZO1Y3ib.jpg",
+      "logoAlt": "Stranger Thing S4 E9"
     }
   ]
 }

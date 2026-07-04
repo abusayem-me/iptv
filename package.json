@@ -9,6 +9,7 @@
     "lint": "next lint",
     "parse-channels": "node scripts/parse-channel-export.mjs",
     "merge-github-channels": "node scripts/merge-github-channels.mjs",
+    "merge-m3u-channels": "node scripts/merge-m3u-channels.mjs",
     "fix-logos": "node scripts/validate-and-fix-logos.mjs",
     "generate-pwa-icons": "node scripts/generate-pwa-icons.mjs",
     "list-placeholder-logos": "node scripts/list-placeholder-logos.mjs",
