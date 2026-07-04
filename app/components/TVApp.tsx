@@ -824,196 +824,210 @@ export function TVApp() {
         </div>
       ) : null}
 
-      <section className="player-section">
-        {active && proxiedSrc ? (
-          <VideoPlayer
-            key={proxiedSrc}
-            src={proxiedSrc}
-            channelName={active.name}
-            onPlaybackHealth={onPlaybackHealth}
+      <div className="tv-main">
+        <aside className="tv-player-pane" aria-label="Player">
+          <section className="player-section">
+            {active && proxiedSrc ? (
+              <VideoPlayer
+                key={proxiedSrc}
+                src={proxiedSrc}
+                channelName={active.name}
+                onPlaybackHealth={onPlaybackHealth}
+              />
+            ) : (
+              <div className="player-placeholder">Select a channel</div>
+            )}
+          </section>
+
+          {continueChannels.length > 0 ? (
+            <section className="continue-section" aria-labelledby="continue-heading">
+              <div className="continue-head">
+                <h2 id="continue-heading" className="continue-title">
+                  Continue watching
+                </h2>
+                <button type="button" className="btn-text" onClick={clearContinue}>
+                  Clear
+                </button>
+              </div>
+              <div className="continue-scroll" role="list">
+                {continueChannels.map((ch) => (
+                  <button
+                    key={ch.streamUrl}
+                    type="button"
+                    role="listitem"
+                    className={`continue-card ${active?.streamUrl === ch.streamUrl ? "is-playing" : ""}`}
+                    onClick={() => onPick(ch)}
+                  >
+                    <div className="continue-logo">
+                      <img
+                        src={ch.logoUrl?.trim() ? ch.logoUrl : "/tv-logo-placeholder.svg"}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        onError={(e) => {
+                          const el = e.currentTarget;
+                          if (el.dataset.fallback === "1") return;
+                          el.dataset.fallback = "1";
+                          el.src = "/tv-logo-placeholder.svg";
+                        }}
+                      />
+                    </div>
+                    <span className="continue-name">{ch.name}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          ) : null}
+        </aside>
+
+        <div className="tv-browse-pane" aria-label="Channel browser">
+          <ChannelFilterPanel
+            q={q}
+            onSearchChange={setQ}
+            view={view}
+            onViewChange={setView}
+            favCount={favOrder.length}
+            cat={cat}
+            onCategoryChange={setCat}
+            categories={data.categories}
+            categoryLabel={categoryLabel}
+            filteredCount={filtered.length}
+            shownCount={healthFiltered.length}
+            totalCount={data.channels.length}
+            healthFilterActive={healthFilterActive}
+            hasActiveFilters={hasActiveFilters}
+            onResetFilters={clearFilters}
+            categoryCheckCount={categoryCheckTargets.length}
+            checkRunning={checkRunning}
+            checkStats={checkStats}
+            healthCheckedAt={healthCheckedAt}
+            hasHealthResults={hasHealthResults}
+            healthFilter={healthFilter}
+            onHealthFilterChange={setHealthFilter}
+            onStartHealthCheck={() => void startHealthCheck()}
+            onStopHealthCheck={stopHealthCheck}
           />
-        ) : (
-          <div className="player-placeholder">Select a channel</div>
-        )}
-      </section>
 
-      {continueChannels.length > 0 ? (
-        <section className="continue-section" aria-labelledby="continue-heading">
-          <div className="continue-head">
-            <h2 id="continue-heading" className="continue-title">
-              Continue watching
-            </h2>
-            <button type="button" className="btn-text" onClick={clearContinue}>
-              Clear
-            </button>
-          </div>
-          <div className="continue-scroll" role="list">
-            {continueChannels.map((ch) => (
-              <button
-                key={ch.streamUrl}
-                type="button"
-                role="listitem"
-                className={`continue-card ${active?.streamUrl === ch.streamUrl ? "is-playing" : ""}`}
-                onClick={() => onPick(ch)}
-              >
-                <div className="continue-logo">
-                  <img
-                    src={ch.logoUrl?.trim() ? ch.logoUrl : "/tv-logo-placeholder.svg"}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => {
-                      const el = e.currentTarget;
-                      if (el.dataset.fallback === "1") return;
-                      el.dataset.fallback = "1";
-                      el.src = "/tv-logo-placeholder.svg";
-                    }}
-                  />
-                </div>
-                <span className="continue-name">{ch.name}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      <ChannelFilterPanel
-        q={q}
-        onSearchChange={setQ}
-        view={view}
-        onViewChange={setView}
-        favCount={favOrder.length}
-        cat={cat}
-        onCategoryChange={setCat}
-        categories={data.categories}
-        categoryLabel={categoryLabel}
-        filteredCount={filtered.length}
-        shownCount={healthFiltered.length}
-        totalCount={data.channels.length}
-        healthFilterActive={healthFilterActive}
-        hasActiveFilters={hasActiveFilters}
-        onResetFilters={clearFilters}
-        categoryCheckCount={categoryCheckTargets.length}
-        checkRunning={checkRunning}
-        checkStats={checkStats}
-        healthCheckedAt={healthCheckedAt}
-        hasHealthResults={hasHealthResults}
-        healthFilter={healthFilter}
-        onHealthFilterChange={setHealthFilter}
-        onStartHealthCheck={() => void startHealthCheck()}
-        onStopHealthCheck={stopHealthCheck}
-      />
-
-      {view === "favorites" && favOrder.length > 1 && !isFavReorderMode ? (
-        <p className="reorder-hint">
-          To drag and reorder favorites, open <strong>Favorites</strong>, choose <strong>All categories</strong>, and
-          clear the search box.
-        </p>
-      ) : null}
+          {view === "favorites" && favOrder.length > 1 && !isFavReorderMode ? (
+            <p className="reorder-hint">
+              To drag and reorder favorites, open <strong>Favorites</strong>, choose <strong>All categories</strong>, and
+              clear the search box.
+            </p>
+          ) : null}
 
           {isFavReorderMode ? (
-        <p className="reorder-hint" role="status">
-          Drag the <strong>⋮⋮</strong> handle on each card to reorder favorites. Order syncs to your account when signed
-          in.
-        </p>
-      ) : null}
+            <p className="reorder-hint" role="status">
+              Drag the <strong>⋮⋮</strong> handle on each card to reorder favorites. Order syncs to your account when signed
+              in.
+            </p>
+          ) : null}
 
-      <div className="channel-grid">
-        {visibleChannels.map((ch, idx) => {
-          const isFav = favSet.has(ch.streamUrl);
-          const health = streamHealth.get(ch.streamUrl);
-          return (
-            <div
-              key={ch.streamUrl}
-              className={`ch-cell ${isFavReorderMode ? "has-drag-handle" : ""} ${dragIdx === idx ? "is-dragging" : ""} ${dragOverIdx === idx ? "drag-over" : ""} ${health === "dead" ? "ch-dead" : ""}`}
-              onDragOver={(e) => onDragOverFav(e, idx)}
-              onDrop={(e) => onDropFav(e, idx)}
-            >
-              {isFavReorderMode ? (
-                <div
-                  className="ch-drag-handle"
-                  draggable
-                  onDragStart={(e) => onDragStartFav(e, idx)}
-                  onDragEnd={onDragEndFav}
-                  title="Drag to reorder"
-                  aria-label={`Reorder ${ch.name}`}
-                >
-                  <span aria-hidden>⋮⋮</span>
-                </div>
-              ) : null}
-              {health ? (
-                <span
-                  className={`ch-health ch-health-${health}`}
-                  title={health === "live" ? "Stream responded" : health === "dead" ? "Stream unreachable or error" : "Checking…"}
-                >
-                  {health === "checking" ? "…" : health === "live" ? "Live" : "Dead"}
-                </span>
-              ) : null}
-              <button
-                type="button"
-                draggable={false}
-                className={`ch-fav-btn ${isFav ? "is-fav" : ""}`}
-                onClick={(e) => toggleFav(ch.streamUrl, e)}
-                aria-pressed={isFav}
-                aria-label={isFav ? `Remove ${ch.name} from favorites` : `Add ${ch.name} to favorites`}
-                title={isFav ? "Remove from favorites" : "Add to favorites"}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill={isFav ? "currentColor" : "none"} aria-hidden>
-                  <path
-                    stroke="currentColor"
-                    strokeWidth="1.75"
-                    d="M12 3.2l2.35 4.76 5.26.77-3.8 3.7.9 5.24L12 15.9l-4.7 2.47.9-5.24-3.8-3.7 5.26-.77L12 3.2z"
-                  />
-                </svg>
-              </button>
-              <button
-                type="button"
-                draggable={false}
-                className={active?.streamUrl === ch.streamUrl ? "ch-card playing" : "ch-card"}
-                onClick={() => onPick(ch)}
-              >
-                <span className="ch-logo-wrap">
-                  <img
-                    src={ch.logoUrl?.trim() ? ch.logoUrl : "/tv-logo-placeholder.svg"}
-                    alt=""
-                    className="ch-logo"
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => {
-                      const el = e.currentTarget;
-                      if (el.dataset.fallback === "1") return;
-                      el.dataset.fallback = "1";
-                      el.src = "/tv-logo-placeholder.svg";
-                    }}
-                  />
-                </span>
-                <span className="ch-name">{ch.name}</span>
-                <span className="ch-cat">{categoryLabel(ch.category)}</span>
-              </button>
+          <div className="channel-browse-scroll">
+            <div className="channel-grid">
+              {visibleChannels.map((ch, idx) => {
+                const isFav = favSet.has(ch.streamUrl);
+                const health = streamHealth.get(ch.streamUrl);
+                return (
+                  <div
+                    key={ch.streamUrl}
+                    className={`ch-cell ${isFavReorderMode ? "has-drag-handle" : ""} ${dragIdx === idx ? "is-dragging" : ""} ${dragOverIdx === idx ? "drag-over" : ""} ${health === "dead" ? "ch-dead" : ""}`}
+                    onDragOver={(e) => onDragOverFav(e, idx)}
+                    onDrop={(e) => onDropFav(e, idx)}
+                  >
+                    {isFavReorderMode ? (
+                      <div
+                        className="ch-drag-handle"
+                        draggable
+                        onDragStart={(e) => onDragStartFav(e, idx)}
+                        onDragEnd={onDragEndFav}
+                        title="Drag to reorder"
+                        aria-label={`Reorder ${ch.name}`}
+                      >
+                        <span aria-hidden>⋮⋮</span>
+                      </div>
+                    ) : null}
+                    {health ? (
+                      <span
+                        className={`ch-health ch-health-${health}`}
+                        title={
+                          health === "live"
+                            ? "Stream responded"
+                            : health === "dead"
+                              ? "Stream unreachable or error"
+                              : "Checking…"
+                        }
+                      >
+                        {health === "checking" ? "…" : health === "live" ? "Live" : "Dead"}
+                      </span>
+                    ) : null}
+                    <button
+                      type="button"
+                      draggable={false}
+                      className={`ch-fav-btn ${isFav ? "is-fav" : ""}`}
+                      onClick={(e) => toggleFav(ch.streamUrl, e)}
+                      aria-pressed={isFav}
+                      aria-label={isFav ? `Remove ${ch.name} from favorites` : `Add ${ch.name} to favorites`}
+                      title={isFav ? "Remove from favorites" : "Add to favorites"}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill={isFav ? "currentColor" : "none"} aria-hidden>
+                        <path
+                          stroke="currentColor"
+                          strokeWidth="1.75"
+                          d="M12 3.2l2.35 4.76 5.26.77-3.8 3.7.9 5.24L12 15.9l-4.7 2.47.9-5.24-3.8-3.7 5.26-.77L12 3.2z"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      draggable={false}
+                      className={active?.streamUrl === ch.streamUrl ? "ch-card playing" : "ch-card"}
+                      onClick={() => onPick(ch)}
+                    >
+                      <span className="ch-logo-wrap">
+                        <img
+                          src={ch.logoUrl?.trim() ? ch.logoUrl : "/tv-logo-placeholder.svg"}
+                          alt=""
+                          className="ch-logo"
+                          loading="lazy"
+                          decoding="async"
+                          onError={(e) => {
+                            const el = e.currentTarget;
+                            if (el.dataset.fallback === "1") return;
+                            el.dataset.fallback = "1";
+                            el.src = "/tv-logo-placeholder.svg";
+                          }}
+                        />
+                      </span>
+                      <span className="ch-name">{ch.name}</span>
+                      <span className="ch-cat">{categoryLabel(ch.category)}</span>
+                    </button>
+                  </div>
+                );
+              })}
             </div>
-          );
-        })}
-      </div>
 
-      {!isFavReorderMode && visibleCount < healthFiltered.length ? (
-        <div className="load-more-wrap">
-          <button type="button" className="btn-load-more" onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}>
-            Load more ({healthFiltered.length - visibleCount} left)
-          </button>
+            {!isFavReorderMode && visibleCount < healthFiltered.length ? (
+              <div className="load-more-wrap">
+                <button type="button" className="btn-load-more" onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}>
+                  Load more ({healthFiltered.length - visibleCount} left)
+                </button>
+              </div>
+            ) : null}
+
+            {healthFiltered.length === 0 && filtered.length > 0 ? (
+              <p className="empty">No {healthFilter} channels in this view. Try another filter or re-run the check.</p>
+            ) : null}
+
+            {filtered.length === 0 ? (
+              <p className="empty">
+                {view === "favorites" && favOrder.length === 0
+                  ? "No favorites yet. Use the star on a channel card to save it here."
+                  : "No channels match your filters."}
+              </p>
+            ) : null}
+          </div>
         </div>
-      ) : null}
-
-      {healthFiltered.length === 0 && filtered.length > 0 ? (
-        <p className="empty">No {healthFilter} channels in this view. Try another filter or re-run the check.</p>
-      ) : null}
-
-      {filtered.length === 0 ? (
-        <p className="empty">
-          {view === "favorites" && favOrder.length === 0
-            ? "No favorites yet. Use the star on a channel card to save it here."
-            : "No channels match your filters."}
-        </p>
-      ) : null}
+      </div>
 
       <AuthAccountModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} />
       {profileDrawer}
