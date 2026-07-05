@@ -134,6 +134,47 @@ main {
   padding: 0.65rem 1.25rem;
 }
 
+.auth-gate-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  align-items: stretch;
+}
+
+.btn-auth-secondary {
+  border-color: rgba(140, 170, 255, 0.28);
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.firebase-auth-guest {
+  color: #9ed4ff;
+  font-weight: 600;
+}
+
+.btn-guest-pro {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  background: rgba(0, 229, 255, 0.1);
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s, transform 0.12s;
+}
+
+.btn-guest-pro:hover:not(:disabled) {
+  background: rgba(0, 229, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+.btn-guest-pro:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .site-header {
   position: relative;
   display: flex;

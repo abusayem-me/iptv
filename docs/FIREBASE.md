@@ -42,7 +42,7 @@ This repo includes:
 
    Both run `scripts/generate-env-local.mjs`, which reads `.firebaserc`’s default project (or `FIREBASE_PROJECT`) and the first WEB app’s SDK config. You can still copy values manually from **`.env.example`** / the Console if you prefer.
 
-3. Enable **Authentication → Sign-in method:** turn on **Google** and **Email/Password** (for account creation in the app).
+3. Enable **Authentication → Sign-in method:** turn on **Google**, **Email/Password**, and **Anonymous** (guest mode).
 
 4. Enable **Firestore** in native mode.
 
@@ -58,7 +58,7 @@ This repo includes:
 
 ## Part C — What the web app syncs
 
-When Firebase env vars are set and the user **signs in** (Google or email/password):
+When Firebase env vars are set and the user **signs in** (guest, Google, or email/password):
 
 - The **channel list** is fetched only after authentication so playback stays tied to an account.
 - **Firestore document** `userSettings/{uid}` stores `favorites`, `recent`, **`watchHistory`** (deduped channels you opened, up to 120), `theme`, last channel, and library filters. The client keeps this document in **real time sync** (`onSnapshot`) so changes from another device merge into this browser (when the write is not a pending local echo).

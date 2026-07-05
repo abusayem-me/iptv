@@ -30,6 +30,7 @@ function GoogleMark() {
 
 export function AuthAccountModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const {
+    signInAsGuest,
     signInWithGoogle,
     signUpWithEmail,
     signInWithEmail,
@@ -172,26 +173,47 @@ export function AuthAccountModal({ open, onClose }: { open: boolean; onClose: ()
 
             <div className="auth-modal-body">
               {mode !== "reset" ? (
-                <button
-                  type="button"
-                  className="btn-google btn-google-pro"
-                  disabled={busy}
-                  onClick={async () => {
-                    clearAuthError();
-                    setBusy(true);
-                    try {
-                      await signInWithGoogle();
-                      close();
-                    } catch {
-                      /* authError */
-                    } finally {
-                      setBusy(false);
-                    }
-                  }}
-                >
-                  <GoogleMark />
-                  <span>Continue with Google</span>
-                </button>
+                <>
+                  <button
+                    type="button"
+                    className="btn-guest btn-guest-pro"
+                    disabled={busy}
+                    onClick={async () => {
+                      clearAuthError();
+                      setBusy(true);
+                      try {
+                        await signInAsGuest();
+                        close();
+                      } catch {
+                        /* authError */
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                  >
+                    Continue as guest
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-google btn-google-pro"
+                    disabled={busy}
+                    onClick={async () => {
+                      clearAuthError();
+                      setBusy(true);
+                      try {
+                        await signInWithGoogle();
+                        close();
+                      } catch {
+                        /* authError */
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                  >
+                    <GoogleMark />
+                    <span>Continue with Google</span>
+                  </button>
+                </>
               ) : null}
 
               {mode !== "reset" ? (

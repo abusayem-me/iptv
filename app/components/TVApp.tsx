@@ -87,8 +87,9 @@ function reorderArray<T>(arr: T[], from: number, to: number): T[] {
 }
 
 export function TVApp() {
-  const { user, hasFirebaseConfig, authLoading, prefsHydrateVersion, signOutUser, bumpPrefsHydrate } = useFirebaseAuth();
+  const { user, isGuest, hasFirebaseConfig, authLoading, prefsHydrateVersion, signOutUser, signInAsGuest, bumpPrefsHydrate } = useFirebaseAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [guestBusy, setGuestBusy] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [deviceRows, setDeviceRows] = useState<DevicePresenceRow[]>([]);
   const [remotePlayHint, setRemotePlayHint] = useState<{
@@ -227,11 +228,6 @@ export function TVApp() {
   }, [canLoadChannels]);
 
   useEffect(() => {
-    if (!hasFirebaseConfig || authLoading || user) return;
-    setAuthModalOpen(true);
-  }, [hasFirebaseConfig, authLoading, user]);
-
-  useEffect(() => {
     if (!user || !hasFirebaseConfig) return;
     const db = getFirebaseDb();
     if (!db) return;
@@ -246,15 +242,15 @@ export function TVApp() {
   }, [user, hasFirebaseConfig, bumpPrefsHydrate]);
 
   useEffect(() => {
-    if (!user || !hasFirebaseConfig) return;
+    if (!user || !hasFirebaseConfig || isGuest) return;
     const unsub = subscribeDevicePresence(user.uid, setDeviceRows);
     return () => {
       unsub?.();
     };
-  }, [user, hasFirebaseConfig]);
+  }, [user, hasFirebaseConfig, isGuest]);
 
   useEffect(() => {
-    if (!user || !hasFirebaseConfig) return;
+    if (!user || !hasFirebaseConfig || isGuest) return;
     const pushPresence = () => {
       void upsertDevicePresence(user.uid, deviceId, {
         label: deviceMeta.label,
@@ -266,7 +262,7 @@ export function TVApp() {
     pushPresence();
     const id = window.setInterval(pushPresence, 45_000);
     return () => clearInterval(id);
-  }, [user, hasFirebaseConfig, deviceId, deviceMeta.label, deviceMeta.platform, active?.streamUrl, active?.name]);
+  }, [user, hasFirebaseConfig, isGuest, deviceId, deviceMeta.label, deviceMeta.platform, active?.streamUrl, active?.name]);
 
   useEffect(() => {
     const others = deviceRows.filter(
@@ -673,12 +669,18 @@ export function TVApp() {
               <span className="firebase-auth-status">Account…</span>
             ) : user ? (
               <>
-                <span className="firebase-auth-email" title={user.email ?? user.uid}>
-                  {user.email ?? "Signed in"}
+                <span className={`firebase-auth-email ${isGuest ? "firebase-auth-guest" : ""}`} title={user.email ?? user.uid}>
+                  {isGuest ? "Guest" : (user.email ?? "Signed in")}
                 </span>
-                <button type="button" className="btn-ghost btn-auth" onClick={() => setProfileOpen(true)}>
-                  Profile
-                </button>
+                {isGuest ? (
+                  <button type="button" className="btn-ghost btn-auth btn-auth-primary" onClick={() => setAuthModalOpen(true)}>
+                    Create account
+                  </button>
+                ) : (
+                  <button type="button" className="btn-ghost btn-auth" onClick={() => setProfileOpen(true)}>
+                    Profile
+                  </button>
+                )}
                 <button type="button" className="btn-ghost btn-auth" onClick={() => void signOutUser()}>
                   Sign out
                 </button>
@@ -753,20 +755,40 @@ export function TVApp() {
   }
 
   if (!user) {
+    const startGuest = async () => {
+      setGuestBusy(true);
+      try {
+        await signInAsGuest();
+      } catch {
+        setAuthModalOpen(true);
+      } finally {
+        setGuestBusy(false);
+      }
+    };
+
     return (
       <div className="tv-layout">
         {siteHeader}
         <section className="auth-gate" aria-labelledby="auth-gate-heading">
           <h2 id="auth-gate-heading" className="auth-gate-title">
-            Sign in to watch
+            Start watching
           </h2>
           <p className="auth-gate-copy">
-            Create an account or sign in with Google so your favorites, continue watching, and library sync across all
-            your devices.
+            Continue as a guest with no sign-up, or create an account to sync favorites and watch history across devices.
           </p>
-          <button type="button" className="btn-auth btn-auth-primary auth-gate-cta" onClick={() => setAuthModalOpen(true)}>
-            Sign in or create account
-          </button>
+          <div className="auth-gate-actions">
+            <button
+              type="button"
+              className="btn-auth btn-auth-primary auth-gate-cta"
+              disabled={guestBusy}
+              onClick={() => void startGuest()}
+            >
+              {guestBusy ? "Starting…" : "Continue as guest"}
+            </button>
+            <button type="button" className="btn-auth btn-auth-secondary auth-gate-cta" onClick={() => setAuthModalOpen(true)}>
+              Sign in or create account
+            </button>
+          </div>
         </section>
         <AuthAccountModal open={authModalOpen} onClose={() => setAuthModalOpen(false)} />
         {profileDrawer}

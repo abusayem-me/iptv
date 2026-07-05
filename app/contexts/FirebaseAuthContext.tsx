@@ -18,6 +18,7 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInAnonymously,
   signOut,
   type User,
 } from "firebase/auth";
@@ -42,6 +43,10 @@ function mapAuthError(code: string): string {
       return "Too many attempts. Try again later.";
     case "auth/popup-closed-by-user":
       return "Sign-in was cancelled.";
+    case "auth/operation-not-allowed":
+      return "Guest sign-in is disabled. Enable Anonymous auth in Firebase Console.";
+    case "auth/admin-restricted-operation":
+      return "Guest sign-in is not allowed for this project.";
     default:
       return "Something went wrong. Try again.";
   }
@@ -49,12 +54,14 @@ function mapAuthError(code: string): string {
 
 type FirebaseAuthContextValue = {
   user: User | null;
+  isGuest: boolean;
   authLoading: boolean;
   hasFirebaseConfig: boolean;
   prefsHydrateVersion: number;
   bumpPrefsHydrate: () => void;
   authError: string | null;
   clearAuthError: () => void;
+  signInAsGuest: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
@@ -144,6 +151,19 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
     };
   }, [user, bumpHydrate]);
 
+  const signInAsGuest = useCallback(async () => {
+    setAuthError(null);
+    const auth = getFirebaseAuth();
+    if (!auth) return;
+    try {
+      await signInAnonymously(auth);
+    } catch (e: unknown) {
+      const code = e && typeof e === "object" && "code" in e ? String((e as { code: string }).code) : "";
+      setAuthError(mapAuthError(code));
+      throw e;
+    }
+  }, []);
+
   const signInWithGoogle = useCallback(async () => {
     setAuthError(null);
     const auth = getFirebaseAuth();
@@ -212,15 +232,19 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
     await signOut(auth);
   }, []);
 
+  const isGuest = user?.isAnonymous ?? false;
+
   const value = useMemo(
     () => ({
       user,
+      isGuest,
       authLoading,
       hasFirebaseConfig,
       prefsHydrateVersion,
       bumpPrefsHydrate,
       authError,
       clearAuthError,
+      signInAsGuest,
       signInWithGoogle,
       signUpWithEmail,
       signInWithEmail,
@@ -229,12 +253,14 @@ export function FirebaseAuthProvider({ children }: { children: ReactNode }) {
     }),
     [
       user,
+      isGuest,
       authLoading,
       hasFirebaseConfig,
       prefsHydrateVersion,
       bumpPrefsHydrate,
       authError,
       clearAuthError,
+      signInAsGuest,
       signInWithGoogle,
       signUpWithEmail,
       signInWithEmail,

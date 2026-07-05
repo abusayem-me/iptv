@@ -79,8 +79,12 @@ export function ProfileAccountPanel({
             <div className="profile-avatar" aria-hidden>
               {(user.email?.[0] ?? user.uid[0] ?? "?").toUpperCase()}
             </div>
-            <p className="profile-email">{user.email ?? "Signed in"}</p>
-            <p className="profile-meta">User ID · {user.uid.slice(0, 8)}…</p>
+            <p className="profile-email">{user.isAnonymous ? "Guest session" : (user.email ?? "Signed in")}</p>
+            <p className="profile-meta">
+              {user.isAnonymous
+                ? "Create an account to sync across devices."
+                : `User ID · ${user.uid.slice(0, 8)}…`}
+            </p>
           </section>
 
           <section className="profile-card" aria-labelledby="fav-heading">

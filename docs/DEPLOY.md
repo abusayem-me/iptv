@@ -5,7 +5,7 @@ The app is a **Next.js** project with **API routes** (`/api/channels`, `/api/hls
 ## Recommended: Vercel + Firebase
 
 1. **Firebase Console**
-   - **Authentication → Sign-in method:** enable **Google** and **Email/Password**.
+   - **Authentication → Sign-in method:** enable **Google**, **Email/Password**, and **Anonymous** (guest mode).
    - **Authentication → Settings → Authorized domains:** add your production domain (e.g. `your-app.vercel.app` and custom domain).
    - **Firestore:** from the repo root, deploy rules (first deploy usually **enables the Firestore API** and **creates the `(default)` native database** if none exists yet):
 
