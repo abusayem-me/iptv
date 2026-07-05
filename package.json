@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:lan": "next dev -H 0.0.0.0 -p 3000",
     "build": "next build",
     "start": "next start",
+    "start:lan": "next start -H 0.0.0.0 -p 3000",
     "lint": "next lint",
     "parse-channels": "node scripts/parse-channel-export.mjs",
     "merge-github-channels": "node scripts/merge-github-channels.mjs",

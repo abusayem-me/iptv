@@ -114,6 +114,7 @@ export function TVApp() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [active, setActive] = useState<Channel | null>(null);
   const [origin, setOrigin] = useState("");
+  const [isLocalHttpMode, setIsLocalHttpMode] = useState(false);
   const [recentEntries, setRecentEntries] = useState<RecentEntry[]>([]);
   const [watchHistory, setWatchHistory] = useState<WatchHistoryEntry[]>(() => []);
   const [theme, setTheme] = useState<ThemePref>("dark");
@@ -136,6 +137,7 @@ export function TVApp() {
   useEffect(() => {
     const fromEnv = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
     setOrigin(fromEnv || window.location.origin);
+    setIsLocalHttpMode(window.location.protocol === "http:");
   }, []);
 
   useEffect(() => {
@@ -836,6 +838,26 @@ export function TVApp() {
   return (
     <div className="tv-layout">
       {siteHeader}
+
+      {isLocalHttpMode ? (
+        <div className="lan-mode-banner" role="status">
+          <strong>Local WiFi mode</strong>
+          <span className="lan-mode-banner-text">
+            The browser loads streams directly from your ISP/BDIX network — no cloud proxy.{" "}
+            {typeof window !== "undefined" &&
+            (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? (
+              <>
+                On phones/TVs, open <code>http://&lt;your-pc-ip&gt;:3000</code> on the same WiFi (run{" "}
+                <code>npm run dev:lan</code>).
+              </>
+            ) : (
+              <>
+                Share on this WiFi: <code>{typeof window !== "undefined" ? window.location.origin : ""}</code>
+              </>
+            )}
+          </span>
+        </div>
+      ) : null}
 
       {remotePlayHint ? (
         <div className="cross-play-banner" role="status">

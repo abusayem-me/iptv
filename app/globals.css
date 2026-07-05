@@ -2180,6 +2180,27 @@ html[data-theme="light"] .btn-google {
   background: rgba(0, 229, 255, 0.08);
 }
 
+.lan-mode-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.65rem;
+  padding: 0.6rem 1rem;
+  border-radius: var(--r-lg);
+  border: 1px solid rgba(76, 175, 80, 0.45);
+  background: rgba(76, 175, 80, 0.1);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.lan-mode-banner-text {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.lan-mode-banner code {
+  font-size: 0.8em;
+}
+
 .cross-play-text {
   flex: 1;
   min-width: 200px;

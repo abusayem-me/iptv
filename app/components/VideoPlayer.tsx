@@ -56,7 +56,7 @@ function clearDirectCache(url: string) {
   }
 }
 
-const PROXY_NETWORK_RETRIES = 2;
+const PROXY_NETWORK_RETRIES = 1;
 const DIRECT_WATCHDOG_MS = 10_000;
 
 export function VideoPlayer({ src, directSrc, rawStreamUrl, channelName, onPlaybackHealth }: Props) {
@@ -140,15 +140,11 @@ export function VideoPlayer({ src, directSrc, rawStreamUrl, channelName, onPlayb
         lowLatencyMode: true,
         maxBufferLength: 30,
         maxMaxBufferLength: 60,
-        // Fail fast when probing the direct route so the proxy fallback kicks in quickly.
-        ...(phase === "direct"
-          ? {
-              manifestLoadingMaxRetry: 0,
-              manifestLoadingTimeOut: 8000,
-              levelLoadingMaxRetry: 1,
-              fragLoadingMaxRetry: 1,
-            }
-          : {}),
+        // Fail fast: we manage retries ourselves so fallbacks kick in quickly.
+        manifestLoadingMaxRetry: 0,
+        manifestLoadingTimeOut: phase === "direct" ? 8000 : 15000,
+        levelLoadingMaxRetry: 1,
+        fragLoadingMaxRetry: 1,
       });
       hlsRef.current = hls;
       hls.attachMedia(video);
@@ -164,7 +160,12 @@ export function VideoPlayer({ src, directSrc, rawStreamUrl, channelName, onPlayb
               failCurrentSource();
             } else if (proxyRetries < PROXY_NETWORK_RETRIES) {
               proxyRetries += 1;
-              hls.startLoad();
+              // startLoad() can't recover a failed manifest fetch; re-issue loadSource for those.
+              if (String(data.details).toLowerCase().startsWith("manifest")) {
+                hls.loadSource(activeSrc);
+              } else {
+                hls.startLoad();
+              }
             } else {
               failCurrentSource();
             }
@@ -335,9 +336,20 @@ export function VideoPlayer({ src, directSrc, rawStreamUrl, channelName, onPlayb
           <div className="player-error-card">
             <h3 className="player-error-title">Can&apos;t load this stream</h3>
             <p className="player-error-text">
-              {isHttpOnHttps
-                ? "This channel's server only accepts local (ISP/BDIX) connections and uses plain HTTP, which browsers block on a secure site. It may still play in an external player on your network."
-                : "The stream didn't respond from your network or through the server. It may be offline right now, or only reachable from certain networks."}
+              {isHttpOnHttps ? (
+                <>
+                  Browsers block plain <code>http://</code> video on secure <code>https://</code> pages — this is a
+                  hard security rule, not a &quot;Proceed anyway&quot; warning you can click through.
+                  <br />
+                  <br />
+                  <strong>Use the browser as the player on your BDIX WiFi:</strong> run{" "}
+                  <code>npm run dev:lan</code> on your PC, then open{" "}
+                  <code>http://&lt;your-pc-ip&gt;:3000</code> (not https) on the same network. Streams play directly,
+                  like VLC inside the browser.
+                </>
+              ) : (
+                "The stream didn't respond from your network or through the server. It may be offline right now, or only reachable from certain networks."
+              )}
             </p>
             <div className="player-error-actions">
               <button type="button" className="player-error-btn" onClick={retry}>
