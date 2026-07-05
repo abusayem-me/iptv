@@ -4,16 +4,70 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import Hls from "hls.js";
 
 type Props = {
+  /** Same-origin proxy URL (fallback, or primary when direct isn't possible). */
   src: string;
+  /** Raw stream URL to try first from the viewer's own network (omit when mixed content would block it). */
+  directSrc?: string;
+  /** Original upstream URL, for copy / external-player actions. */
+  rawStreamUrl?: string;
   channelName: string;
   onPlaybackHealth?: (status: "live" | "dead") => void;
 };
 
-export function VideoPlayer({ src, channelName, onPlaybackHealth }: Props) {
+type Phase = "direct" | "proxy" | "failed";
+
+/** Remember per-host direct-play results for this session so we don't re-probe on every channel. */
+function directCacheKey(url: string): string | null {
+  try {
+    return `sayemtv:direct:${new URL(url).host}`;
+  } catch {
+    return null;
+  }
+}
+
+function readDirectCache(url: string): "ok" | "fail" | null {
+  const key = directCacheKey(url);
+  if (!key) return null;
+  try {
+    const v = sessionStorage.getItem(key);
+    return v === "ok" || v === "fail" ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeDirectCache(url: string, result: "ok" | "fail") {
+  const key = directCacheKey(url);
+  if (!key) return;
+  try {
+    sessionStorage.setItem(key, result);
+  } catch {
+    /* ignore */
+  }
+}
+
+function clearDirectCache(url: string) {
+  const key = directCacheKey(url);
+  if (!key) return;
+  try {
+    sessionStorage.removeItem(key);
+  } catch {
+    /* ignore */
+  }
+}
+
+const PROXY_NETWORK_RETRIES = 2;
+const DIRECT_WATCHDOG_MS = 10_000;
+
+export function VideoPlayer({ src, directSrc, rawStreamUrl, channelName, onPlaybackHealth }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [inPip, setInPip] = useState(false);
   const [pipSupported, setPipSupported] = useState(false);
+  const [phase, setPhase] = useState<Phase>(() =>
+    directSrc && readDirectCache(directSrc) !== "fail" ? "direct" : "proxy"
+  );
+  const [copied, setCopied] = useState(false);
   const reportedRef = useRef<"live" | "dead" | null>(null);
   const onPlaybackHealthRef = useRef(onPlaybackHealth);
 
@@ -36,15 +90,49 @@ export function VideoPlayer({ src, channelName, onPlaybackHealth }: Props) {
 
   useEffect(() => {
     reportedRef.current = null;
-  }, [src]);
+    setPhase(directSrc && readDirectCache(directSrc) !== "fail" ? "direct" : "proxy");
+  }, [src, directSrc]);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !src) return;
+    if (!video || phase === "failed") return;
+
+    const activeSrc = phase === "direct" && directSrc ? directSrc : src;
+    if (!activeSrc) return;
 
     destroy();
 
-    const onPlaying = () => reportHealth("live");
+    let disposed = false;
+    let watchdog: ReturnType<typeof setTimeout> | null = null;
+    let proxyRetries = 0;
+
+    const clearWatchdog = () => {
+      if (watchdog) {
+        clearTimeout(watchdog);
+        watchdog = null;
+      }
+    };
+
+    const failCurrentSource = () => {
+      if (disposed) return;
+      clearWatchdog();
+      if (phase === "direct") {
+        if (directSrc) writeDirectCache(directSrc, "fail");
+        setPhase("proxy");
+      } else {
+        reportHealth("dead");
+        destroy();
+        setPhase("failed");
+      }
+    };
+
+    const onLive = () => {
+      clearWatchdog();
+      if (phase === "direct" && directSrc) writeDirectCache(directSrc, "ok");
+      reportHealth("live");
+    };
+
+    const onPlaying = () => onLive();
 
     if (Hls.isSupported()) {
       const hls = new Hls({
@@ -52,38 +140,60 @@ export function VideoPlayer({ src, channelName, onPlaybackHealth }: Props) {
         lowLatencyMode: true,
         maxBufferLength: 30,
         maxMaxBufferLength: 60,
+        // Fail fast when probing the direct route so the proxy fallback kicks in quickly.
+        ...(phase === "direct"
+          ? {
+              manifestLoadingMaxRetry: 0,
+              manifestLoadingTimeOut: 8000,
+              levelLoadingMaxRetry: 1,
+              fragLoadingMaxRetry: 1,
+            }
+          : {}),
       });
       hlsRef.current = hls;
       hls.attachMedia(video);
       hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-        hls.loadSource(src);
+        hls.loadSource(activeSrc);
       });
-      hls.on(Hls.Events.MANIFEST_PARSED, () => reportHealth("live"));
+      hls.on(Hls.Events.MANIFEST_PARSED, () => onLive());
       hls.on(Hls.Events.ERROR, (_e, data) => {
-        if (data.fatal) {
-          switch (data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
+        if (!data.fatal) return;
+        switch (data.type) {
+          case Hls.ErrorTypes.NETWORK_ERROR:
+            if (phase === "direct") {
+              failCurrentSource();
+            } else if (proxyRetries < PROXY_NETWORK_RETRIES) {
+              proxyRetries += 1;
               hls.startLoad();
-              break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              hls.recoverMediaError();
-              break;
-            default:
-              reportHealth("dead");
-              destroy();
-              break;
-          }
+            } else {
+              failCurrentSource();
+            }
+            break;
+          case Hls.ErrorTypes.MEDIA_ERROR:
+            hls.recoverMediaError();
+            break;
+          default:
+            failCurrentSource();
+            break;
         }
       });
+
+      if (phase === "direct") {
+        watchdog = setTimeout(() => {
+          if (!disposed && reportedRef.current !== "live") failCurrentSource();
+        }, DIRECT_WATCHDOG_MS);
+      }
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = src;
+      video.src = activeSrc;
     }
 
     video.addEventListener("playing", onPlaying);
-    const onVideoError = () => reportHealth("dead");
+    const onVideoError = () => failCurrentSource();
     video.addEventListener("error", onVideoError);
 
     return () => {
+      disposed = true;
+      clearWatchdog();
       video.removeEventListener("playing", onPlaying);
       video.removeEventListener("error", onVideoError);
       const v = videoRef.current;
@@ -92,13 +202,30 @@ export function VideoPlayer({ src, channelName, onPlaybackHealth }: Props) {
       }
       destroy();
     };
-  }, [src, destroy, reportHealth]);
+  }, [src, directSrc, phase, destroy, reportHealth]);
 
   useEffect(() => {
     const v = videoRef.current;
-    if (!v) return;
+    if (!v || phase === "failed") return;
     v.play().catch(() => {});
-  }, [src]);
+  }, [src, phase]);
+
+  const retry = useCallback(() => {
+    reportedRef.current = null;
+    if (directSrc) clearDirectCache(directSrc);
+    setPhase(directSrc ? "direct" : "proxy");
+  }, [directSrc]);
+
+  const copyStreamUrl = useCallback(async () => {
+    const url = rawStreamUrl ?? directSrc ?? src;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard unavailable */
+    }
+  }, [rawStreamUrl, directSrc, src]);
 
   /** Picture-in-Picture: browser may auto-pop-out when tab is hidden; manual toggle as fallback. */
   useEffect(() => {
@@ -169,9 +296,15 @@ export function VideoPlayer({ src, channelName, onPlaybackHealth }: Props) {
     }
   }, []);
 
+  const externalUrl = rawStreamUrl ?? directSrc ?? src;
+  const isHttpOnHttps =
+    typeof window !== "undefined" &&
+    window.location.protocol === "https:" &&
+    externalUrl.startsWith("http://");
+
   return (
     <div className="player-shell">
-      {pipSupported ? (
+      {pipSupported && phase !== "failed" ? (
         <button
           type="button"
           className="pip-toggle"
@@ -197,6 +330,32 @@ export function VideoPlayer({ src, channelName, onPlaybackHealth }: Props) {
         disablePictureInPicture={false}
         aria-label={`Live stream: ${channelName}`}
       />
+      {phase === "failed" ? (
+        <div className="player-error-overlay" role="alert">
+          <div className="player-error-card">
+            <h3 className="player-error-title">Can&apos;t load this stream</h3>
+            <p className="player-error-text">
+              {isHttpOnHttps
+                ? "This channel's server only accepts local (ISP/BDIX) connections and uses plain HTTP, which browsers block on a secure site. It may still play in an external player on your network."
+                : "The stream didn't respond from your network or through the server. It may be offline right now, or only reachable from certain networks."}
+            </p>
+            <div className="player-error-actions">
+              <button type="button" className="player-error-btn" onClick={retry}>
+                Retry
+              </button>
+              <button type="button" className="player-error-btn" onClick={copyStreamUrl}>
+                {copied ? "Copied!" : "Copy stream URL"}
+              </button>
+              <a className="player-error-btn" href={`vlc://${externalUrl}`}>
+                Open in VLC
+              </a>
+            </div>
+            <p className="player-error-hint">
+              Paste the URL into VLC / MX Player (Media → Open Network Stream) if the button doesn&apos;t launch it.
+            </p>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

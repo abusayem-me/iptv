@@ -514,6 +514,18 @@ export function TVApp() {
     return hlsProxyUrl(origin, active.streamUrl);
   }, [active, origin]);
 
+  /**
+   * Raw stream URL the browser may fetch directly from the viewer's own network
+   * (reaches ISP/BDIX-only hosts the server can't). Blocked as mixed content when
+   * the page is https and the stream is plain http, so we skip it there.
+   */
+  const directSrc = useMemo(() => {
+    if (!active || typeof window === "undefined") return "";
+    if (active.streamUrl.startsWith("https://")) return active.streamUrl;
+    if (window.location.protocol === "http:") return active.streamUrl;
+    return "";
+  }, [active]);
+
   const onPick = useCallback((ch: Channel) => {
     setActive(ch);
   }, []);
@@ -852,8 +864,10 @@ export function TVApp() {
           <section className="player-section">
             {active && proxiedSrc ? (
               <VideoPlayer
-                key={proxiedSrc}
+                key={active.streamUrl}
                 src={proxiedSrc}
+                directSrc={directSrc || undefined}
+                rawStreamUrl={active.streamUrl}
                 channelName={active.name}
                 onPlaybackHealth={onPlaybackHealth}
               />

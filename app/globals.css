@@ -296,6 +296,74 @@ main {
   }
 }
 
+.player-error-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(4, 6, 14, 0.88);
+  backdrop-filter: blur(4px);
+}
+
+.player-error-card {
+  max-width: 30rem;
+  text-align: center;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.player-error-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.player-error-text {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.player-error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.player-error-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  background: rgba(8, 10, 22, 0.9);
+  color: var(--accent, #00e5ff);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.player-error-btn:hover {
+  border-color: rgba(0, 229, 255, 0.8);
+  background: rgba(12, 16, 32, 0.95);
+}
+
+.player-error-hint {
+  margin: 0;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
 .player-placeholder {
   aspect-ratio: 16 / 9;
   display: grid;
